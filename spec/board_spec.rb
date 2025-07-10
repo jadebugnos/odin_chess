@@ -8,9 +8,6 @@ RSpec.describe ChessBoard do
     end
   end
 
-  describe '#add_designs' do
-  end
-
   describe '#add_pieces' do
   end
 
