@@ -13,7 +13,7 @@ class ChessBoard
     i = 8
     @board.each do |row|
       puts horizontal
-      puts "#{i} |" + row.map { |cell| "#{cell.to_s.center(3)}|" }.join
+      puts "#{i} |" + row.map { |cell| "#{cell.center(3)}|" }.join
       i -= 1
     end
     puts horizontal
