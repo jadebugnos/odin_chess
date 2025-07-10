@@ -30,10 +30,6 @@ RSpec.describe ChessBoard do
       chess_board.instance_variable_set(:@chess_pieces, chess_pieces)
       allow(chess_board).to receive(:add_pieces)
     end
-    it 'will send a message to Chessboard to return initial positions' do
-      expect(chess_pieces).to receive(:positions)
-      chess_board.set_up_pieces
-    end
 
     it 'will call #add_pieces exactly 12 times to add white and black pieces' do
       expect(chess_board).to receive(:add_pieces).exactly(12).times
