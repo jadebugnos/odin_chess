@@ -42,6 +42,23 @@ RSpec.describe ChessBoard do
   end
 
   describe '#add_pieces' do
+    subject(:chess_board) { described_class.new }
+
+    it 'will add white rook pieces' do
+      key = "\u2656"
+      positions = [[7, 0], [7, 7]]
+      board = Array.new(8) { Array.new(8, '') }
+
+      expect { chess_board.add_pieces(board, key, positions) }.to change { board[7][0] }.from('').to(key)
+    end
+
+    it 'will add black pawn pieces' do
+      key = "\u265F"
+      positions = (0..7).map { |col| [1, col] }
+      board = Array.new(8) { Array.new(8, '') }
+
+      expect { chess_board.add_pieces(board, key, positions) }.to change { board[1][0] }.from('').to(key)
+    end
   end
 
   describe '#update_board' do
