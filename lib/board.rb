@@ -1,4 +1,5 @@
 require_relative 'pieces'
+require_relative 'positions'
 
 # this file holds the ChessBoard class which holds all game board logic
 class ChessBoard
@@ -28,12 +29,12 @@ class ChessBoard
 
   def set_up_pieces
     # adding white pieces
-    @chess_pieces.positions[:white].each do |unicode, coordinates|
+    Positions::INITIAL_POSITIONS[:white].each do |unicode, coordinates|
       add_pieces(@board, unicode, coordinates)
     end
 
     # adding black pieces
-    @chess_pieces.positions[:black].each do |unicode, coordinates|
+    Positions::INITIAL_POSITIONS[:black].each do |unicode, coordinates|
       add_pieces(@board, unicode, coordinates)
     end
   end
