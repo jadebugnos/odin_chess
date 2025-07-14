@@ -1,4 +1,4 @@
-class Player # rubocop:disable Style/Documentation
+class Player
   def validate_player_move
     move = []
     loop do
