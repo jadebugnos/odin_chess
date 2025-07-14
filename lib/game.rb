@@ -19,7 +19,7 @@ class ChessGame
   end
 
   def handle_moves
-    move = @player.validate_player_move
+    @player.validate_player_move
   end
 
   def game_intro
