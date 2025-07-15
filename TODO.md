@@ -8,6 +8,11 @@
   - [x] Set up initial board with all pieces
   - [ ] Ask for player names and assign them to `BlackPlayer` and `WhitePlayer`
   - [ ] Ask each player to choose their color (black or white)
+
+## Player move validation 
+- [ ] allow players to choose if they want coordinate system or Algebraic Notation to move pieces
+- [ ] implement Notation based movement
+- [ ] implement Notation to index based conversion feature for Board manipulation
     
 ## Legal Moves Validation
 ### Pawn Movement & Rules
