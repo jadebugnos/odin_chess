@@ -6,9 +6,13 @@ class ChessGame
   end
 
   def play_game
+    prepare_game
+    run_game
+  end
+
+  def prepare_game
     slow_print(game_intro)
     @board.set_up_pieces
-    run_game
   end
 
   def run_game
