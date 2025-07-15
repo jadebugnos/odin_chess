@@ -6,6 +6,11 @@ class ChessPiece
     @legal_moves_black = lbm
   end
 
+  # returns true if the players move is legal otherwise false.
+  # Parameters:
+  # - color: Symbol representing the player's color (:white or :black).
+  #          Used to select the appropriate legal move set.
+  # - move: An array of two coordinates [from, to], where each is a [row, col] pair.
   def legal_move?(color, move)
     legal_moves = color == :white ? @legal_moves_white : @legal_moves_black
     from = move[0]
