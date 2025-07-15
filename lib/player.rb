@@ -1,4 +1,9 @@
 class Player
+  def initialize
+    @black_player = BlackPlayer.new
+    @white_player = WhitePlayer.new
+  end
+
   def validate_player_move
     move = []
     loop do
