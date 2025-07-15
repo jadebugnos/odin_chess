@@ -1,12 +1,13 @@
 # TODO
 
 ## Game Flow
+
 ### Game Preparations
-[ ] create a prepare_game method to setup game before running the game loop. 
-    - [X] print intro
-    - [X] setup board pieces initial positions
-    - [ ] ask and assign names to Player's children objects(black/white)
-    - [ ] ask and assign colors to players (black or white)
+- [ ] Create a `prepare_game` method to handle setup before starting the game loop
+  - [x] Print intro message
+  - [x] Set up initial board with all pieces
+  - [ ] Ask for player names and assign them to `BlackPlayer` and `WhitePlayer`
+  - [ ] Ask each player to choose their color (black or white)
     
 ## Legal Moves Validation
 ### Pawn Movement & Rules
