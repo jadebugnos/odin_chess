@@ -85,6 +85,9 @@ RSpec.describe Player do
   describe '#check_num_and_letter?' do
     context 'when the num and letter arguments are valid' do
       subject(:valid_player_input) { described_class.new }
+      before do
+        allow(valid_player_input).to receive(:puts)
+      end
 
       it 'will return true' do
         num = '8'
@@ -97,6 +100,9 @@ RSpec.describe Player do
 
     context 'when the num argument is invalid' do
       subject(:invalid_arguments) { described_class.new }
+      before do
+        allow(invalid_arguments).to receive(:puts)
+      end
       it 'will return false if non numeric character' do
         num = '#'
         letter = 'h'
@@ -129,5 +135,34 @@ RSpec.describe Player do
         expect(out_of_range_char).to eq(false)
       end
     end
+  end
+
+  describe '#ask_assign_names' do
+    subject(:player_name) { described_class.new }
+
+    context 'when the player is sure with the name' do
+      before do
+        allow(player_name).to receive(:gets).and_return('Jade', 'y')
+        allow(player_name).to receive(:puts)
+      end
+
+      it "will save the player's name to @name" do
+        expect { player_name.ask_assign_names }.to change { player_name.name }.from(nil).to('Jade')
+      end
+    end
+
+    context 'when the player is not sure with the name' do
+      before do
+        allow(player_name).to receive(:gets).and_return('Jade', 'n', 'Jones', 'y')
+        allow(player_name).to receive(:puts)
+      end
+
+      it 'will ask the player again for the name in the terminal' do
+        expect { player_name.ask_assign_names }.to change { player_name.name }.from(nil).to('Jones')
+      end
+    end
+  end
+
+  describe '#ask_assign-colors' do
   end
 end
