@@ -66,4 +66,27 @@ class Player
       end
     end
   end
+
+  def ask_assign_colors # rubocop:disable Metrics/MethodLength
+    valid_colors = %w[black white]
+    color = nil
+    color_is_valid = nil
+
+    until color_is_valid
+      puts 'What color do you want to play?(black/white)'
+      color = gets.chomp.strip.downcase
+      color_is_valid = valid_colors.include?(color)
+
+      if color_is_valid
+        puts "your color is #{color}"
+      else
+        puts 'Invalid input! Try again.'
+      end
+    end
+
+    @color = color.to_sym
+  end
 end
+
+# player = Player.new
+# player.ask_assign_colors

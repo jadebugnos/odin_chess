@@ -164,5 +164,35 @@ RSpec.describe Player do
   end
 
   describe '#ask_assign-colors' do
+    subject(:player_color) { described_class.new }
+
+    context 'when player input the correct color' do
+      before do
+        allow(player_color).to receive(:puts)
+      end
+      it 'will assign player input to @color' do
+        allow(player_color).to receive(:gets).and_return('black')
+
+        expect { player_color.ask_assign_colors }.to change { player_color.color }.from(nil).to(:black)
+      end
+
+      it 'will work if the player input is white' do
+        allow(player_color).to receive(:gets).and_return('white')
+
+        expect { player_color.ask_assign_colors }.to change { player_color.color }.from(nil).to(:white)
+      end
+    end
+
+    context 'when the player input is invalid' do
+      before do
+        allow(player_color).to receive(:puts)
+      end
+
+      it 'will not save the wrong inputs' do
+        allow(player_color).to receive(:gets).and_return('sdf', '#$!', 'qouf83hh', 'white')
+
+        expect { player_color.ask_assign_colors }.to change { player_color.color }.from(nil).to(:white)
+      end
+    end
   end
 end
