@@ -1,7 +1,9 @@
 class Player
-  def initialize
-    @black_player = BlackPlayer.new
-    @white_player = WhitePlayer.new
+  attr_accessor :name, :color
+
+  def initialize(name = nil, color = nil)
+    @name = name
+    @color = color
   end
 
   def validate_player_move
@@ -43,5 +45,25 @@ class Player
 
     puts 'Invalid input! Try Again'
     false
+  end
+
+  def ask_assign_names # rubocop:disable Metrics/MethodLength
+    answer = nil
+    name = nil
+
+    loop do
+      puts 'what is your name? '
+      name = gets.chomp.strip
+      puts "are you sure you want to use #{name}?(y/n)"
+      answer = gets.chomp.strip.downcase
+      if answer == 'y'
+        puts 'saving name...'
+        @name = name
+        puts 'name saved successfully.'
+        break
+      else
+        puts 'redoing...'
+      end
+    end
   end
 end
