@@ -1,8 +1,13 @@
+require_relative 'color_players/black_player'
+require_relative 'color_players/white_player'
+
 # this file defines the ChessGame class which holds Game logic
 class ChessGame
   def initialize(player, board)
     @player = player
     @board = board
+    @player_one = nil
+    @player_two = nil
   end
 
   def play_game
@@ -13,6 +18,16 @@ class ChessGame
   def prepare_game
     slow_print(game_intro)
     @board.set_up_pieces
+    set_up_player_infos
+  end
+
+  # fix me: allow black and white players to choose(use black and white child objects
+  # instead of the Player parent class)
+  def set_up_player_infos
+    @player_one = Player.new
+    color = @player_one.handle_name_and_color
+    @player_two = Player.new
+    @player_two.handle_name_and_color(color)
   end
 
   def run_game

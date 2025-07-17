@@ -86,7 +86,32 @@ class Player
 
     @color = color.to_sym
   end
-end
 
-# player = Player.new
-# player.ask_assign_colors
+  def handle_name_and_color(color = nil)
+    print_turn_message(color)
+    assign_name
+    assign_color(color)
+  end
+
+  private
+
+  def assign_name
+    ask_assign_names
+  end
+
+  def print_turn_message(color)
+    puts 'Player 2 next. ' unless color.nil?
+  end
+
+  def assign_color(color)
+    valid_colors = %i[black white]
+    black, white = valid_colors
+
+    if valid_colors.include?(color)
+      @color = color == black ? white : black
+      puts "player 2's color will be #{@color}"
+    else
+      ask_assign_colors
+    end
+  end
+end
