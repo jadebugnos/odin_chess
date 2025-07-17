@@ -1,4 +1,4 @@
-class Player
+class Player # rubocop:disable Metrics/ClassLength
   attr_accessor :name, :color
 
   def initialize(name = nil, color = nil)
@@ -18,15 +18,6 @@ class Player
     end
 
     move
-  end
-
-  # Show different messages depending on input stage
-  def print_move_stage(move)
-    if move.zero?
-      puts 'Select a piece to move: '
-    else
-      puts 'select a cell to move: '
-    end
   end
 
   # validates player input
@@ -52,42 +43,28 @@ class Player
   end
 
   # Ask the player to input and confirm their name
-  def ask_assign_names # rubocop:disable Metrics/MethodLength
+  def ask_assign_names
     answer = nil
     name = nil
 
     loop do
-      puts 'what is your name? '
-      name = gets.chomp.strip
-      puts "are you sure you want to use #{name}?(y/n)"
-      answer = gets.chomp.strip.downcase
-      if answer == 'y'
-        puts 'saving name...'
-        @name = name
-        puts 'name saved successfully.'
-        break
-      else
-        puts 'redoing...'
-      end
+      name = prompt_for_name
+
+      answer = prompt_to_save_name(name)
+
+      break if answer == 'y'
     end
   end
 
   # Ask the player to choose their color (black or white)
-  def ask_assign_colors # rubocop:disable Metrics/MethodLength
-    valid_colors = %w[black white]
+  def ask_assign_colors
     color = nil
     color_is_valid = nil
 
     until color_is_valid
-      puts 'What color do you want to play?(black/white)'
-      color = gets.chomp.strip.downcase
-      color_is_valid = valid_colors.include?(color)
+      color, color_is_valid = prompt_for_color
 
-      if color_is_valid
-        puts "your color is #{color}"
-      else
-        puts 'Invalid input! Try again.'
-      end
+      print_color_validity(color_is_valid, color)
     end
 
     @color = color.to_sym
@@ -101,6 +78,59 @@ class Player
   end
 
   private
+
+  def prompt_for_name
+    puts 'what is your name? '
+    gets.chomp.strip
+  end
+
+  def prompt_to_save_name(name)
+    puts "are you sure you want to use #{name}?(y/n)"
+
+    answer = gets.chomp.strip.downcase
+
+    if answer == 'y'
+      puts 'saving name...'
+      @name = name
+      puts 'name saved successfully.'
+    else
+      puts "#{name} was not saved. repeating process..."
+    end
+
+    answer
+  end
+
+  # Helper method for ask_assign_colors.
+  # Prompts the user to enter a color and returns an array:
+  # [user's input color, whether the input is valid].
+  def prompt_for_color
+    valid_colors = %w[black white]
+
+    puts 'What color do you want to play?(black/white)'
+
+    color = gets.chomp.strip.downcase
+
+    [color, valid_colors.include?(color)]
+  end
+
+  # Show different messages depending on input stage
+  def print_move_stage(move)
+    puts "#{@name}'s turn. your color is #{@color}."
+    if move.zero?
+      puts 'Select a piece to move: '
+    else
+      puts 'select a cell to move: '
+    end
+  end
+
+  # helper method for ask_assign_colors to print if the color is valid
+  def print_color_validity(color_is_valid, color)
+    if color_is_valid
+      puts "your color is #{color}"
+    else
+      puts 'Invalid input! Try again.'
+    end
+  end
 
   # Delegates to ask_assign_names
   def assign_name
