@@ -6,19 +6,21 @@ class Player
     @color = color
   end
 
+  # Main method to validate a player's move (expects 2 valid inputs)
   def validate_player_move
     move = []
     loop do
-      print_move_stage(move.length)
+      print_move_stage(move.length) # Prompt based on input stage
       input = gets.chomp.strip.downcase
 
-      move << input if check_input?(input) # helper method to check input validity
-      break if move.length == 2
+      move << input if check_input?(input) # Only accept valid inputs
+      break if move.length == 2 # Expecting 2 steps: from → to
     end
 
     move
   end
 
+  # Show different messages depending on input stage
   def print_move_stage(move)
     if move.zero?
       puts 'Select a piece to move: '
@@ -27,6 +29,7 @@ class Player
     end
   end
 
+  # validates player input
   def check_input?(input)
     unless input.length == 2
       puts 'only accepts 1 number between 1-8 and a letter a-h'
@@ -39,6 +42,7 @@ class Player
     check_num_and_letter?(num, letter)
   end
 
+  # Check if input is within valid board coordinates
   def check_num_and_letter?(num, str)
     return true if ('1'..'8').include?(num) &&
                    ('a'..'h').include?(str)
@@ -47,6 +51,7 @@ class Player
     false
   end
 
+  # Ask the player to input and confirm their name
   def ask_assign_names # rubocop:disable Metrics/MethodLength
     answer = nil
     name = nil
@@ -67,6 +72,7 @@ class Player
     end
   end
 
+  # Ask the player to choose their color (black or white)
   def ask_assign_colors # rubocop:disable Metrics/MethodLength
     valid_colors = %w[black white]
     color = nil
@@ -87,22 +93,26 @@ class Player
     @color = color.to_sym
   end
 
+  # Wrapper method that handles both name and color assignment
   def handle_name_and_color(color = nil)
-    print_turn_message(color)
-    assign_name
-    assign_color(color)
+    print_turn_message(color) # Show message if player 2
+    assign_name               # Ask for and confirm name
+    assign_color(color)       # Assign or ask for color
   end
 
   private
 
+  # Delegates to ask_assign_names
   def assign_name
     ask_assign_names
   end
 
+  # Print message for player 2
   def print_turn_message(color)
     puts 'Player 2 next. ' unless color.nil?
   end
 
+  # Assigns the opposite color if already chosen, otherwise prompts
   def assign_color(color)
     valid_colors = %i[black white]
     black, white = valid_colors
