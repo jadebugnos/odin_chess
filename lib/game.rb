@@ -3,11 +3,12 @@ require_relative 'color_players/white_player'
 
 # this file defines the ChessGame class which holds Game logic
 class ChessGame
-  def initialize(player, board)
-    @player = player
+  def initialize(board)
     @board = board
     @player_one = nil
     @player_two = nil
+    @first_to_move = nil
+    @second_to_move = nil
   end
 
   def play_game
@@ -21,8 +22,6 @@ class ChessGame
     set_up_player_infos
   end
 
-  # fix me: allow black and white players to choose(use black and white child objects
-  # instead of the Player parent class)
   def set_up_player_infos
     @player_one = Player.new
     color = @player_one.handle_name_and_color
@@ -37,8 +36,39 @@ class ChessGame
     end
   end
 
+  # fix me: refactor to use the @player_one and @player_two
+  # instead of @player. allow switching moves between each players
+  # requirements:
+  # - it should allow white player to make the first move
+  # - it should update the board before the next player's move
   def handle_moves
-    @player.validate_player_move
+    set_move_order if @first_to_move.nil?
+    execute_moves
+  end
+
+  private
+
+  # remind me: the update_board is not yet implemented
+  # make sure to TDD it. and validate_player_move should
+  # all be checking this:
+  # - if the move is within the board boundaries
+  # - if the move is within the piece legal moves
+  # - if the move is going into an empty cell or not
+  def execute_moves
+    white_move = @first_to_move.validate_player_move
+    @board.update_board(white_move)
+    black_move = @second_to_move.validate_player_move
+    @board.update_board(black_move)
+  end
+
+  def set_move_order
+    if @player_one.color == :white
+      @first_to_move = @player_one
+      @second_to_move = @player_two
+    else
+      @first_to_move = @player_two
+      @second_to_move = @player_one
+    end
   end
 
   def game_intro
