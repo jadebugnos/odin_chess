@@ -27,14 +27,14 @@ class Player # rubocop:disable Metrics/ClassLength
       return false
     end
 
-    num = input[0]
-    letter = input[1]
+    letter = input[0]
+    num = input[1]
 
-    check_num_and_letter?(num, letter)
+    check_letter_and_num?(letter, num)
   end
 
   # Check if input is within valid board coordinates
-  def check_num_and_letter?(num, str)
+  def check_letter_and_num?(str, num)
     return true if ('1'..'8').include?(num) &&
                    ('a'..'h').include?(str)
 

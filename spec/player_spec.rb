@@ -6,8 +6,8 @@ RSpec.describe Player do
 
     context 'if the player input is valid' do
       before do
-        first = '1a'
-        second = '4a'
+        first = 'a1'
+        second = 'a4'
         allow(player_move).to receive(:gets).and_return(first, second)
         allow(player_move).to receive(:check_input?).and_return(true, true)
         allow(player_move).to receive(:print_move_stage)
@@ -15,18 +15,13 @@ RSpec.describe Player do
 
       let(:player_input) { player_move.validate_player_move }
 
-      it 'it will return an array with 2 elements' do
-        result = %w[1a 4a]
-
+      it 'will return an array with 2 elements' do
+        result = %w[a1 a4]
         expect(player_input).to eql(result)
       end
 
-      it 'will contain letters between a to h' do
-        expect(player_input).to all(match(/[a-h]/))
-      end
-
-      it 'will have numbers between 1-8' do
-        expect(player_input).to all(match(/\A[1-8]/))
+      it 'will contain valid chess coordinates with letter first' do
+        expect(player_input).to all(match(/\A[a-h][1-8]\z/))
       end
     end
 
@@ -34,8 +29,8 @@ RSpec.describe Player do
       before do
         first_invalid = '#i'
         second_invalid = '99'
-        first_valid = '1a'
-        second_valid = '4a'
+        first_valid = 'a1'
+        second_valid = 'a4'
         allow(player_move).to receive(:gets).and_return(first_invalid, second_invalid, first_valid, second_valid)
         allow(player_move).to receive(:check_input?).and_return(false, false, true, true)
         allow(player_move).to receive(:print_move_stage)
@@ -53,11 +48,12 @@ RSpec.describe Player do
 
     context 'when the input length is not exactly 2' do
       before do
-        allow(player_input).to receive(:check_num_and_letter?)
+        allow(player_input).to receive(:check_letter_and_num?)
         allow(player_input).to receive(:puts)
       end
+
       it 'will return false' do
-        input = '11a'
+        input = 'a11'
         length_is_not_two = player_input.check_input?(input)
 
         expect(length_is_not_two).to eq(false)
@@ -65,16 +61,16 @@ RSpec.describe Player do
     end
 
     context 'when the input length is exactly 2' do
-      it 'will continue the execution and call check_num_and_letter' do
-        input = '1a'
+      it 'will continue the execution and call check_letter_and_num' do
+        input = 'a1'
 
-        expect(player_input).to receive(:check_num_and_letter?).with('1', 'a')
+        expect(player_input).to receive(:check_letter_and_num?).with('a', '1')
         player_input.check_input?(input)
       end
 
-      it 'will return true if input pass the validation' do
-        allow(player_input).to receive(:check_num_and_letter?).and_return(true)
-        input = '3g'
+      it 'will return true if input passes the validation' do
+        allow(player_input).to receive(:check_letter_and_num?).and_return(true)
+        input = 'g3'
         valid_input = player_input.check_input?(input)
 
         expect(valid_input).to eq(true)
@@ -82,57 +78,50 @@ RSpec.describe Player do
     end
   end
 
-  describe '#check_num_and_letter?' do
-    context 'when the num and letter arguments are valid' do
-      subject(:valid_player_input) { described_class.new }
-      before do
-        allow(valid_player_input).to receive(:puts)
-      end
+  describe '#check_letter_and_num?' do
+    subject(:player_input) { described_class.new }
+
+    context 'when the letter and number arguments are valid' do
+      before { allow(player_input).to receive(:puts) }
 
       it 'will return true' do
-        num = '8'
         letter = 'h'
-        valid_arguments = valid_player_input.check_num_and_letter?(num, letter)
+        num = '8'
+        valid_arguments = player_input.check_letter_and_num?(letter, num)
 
         expect(valid_arguments).to eq(true)
       end
     end
 
-    context 'when the num argument is invalid' do
-      subject(:invalid_arguments) { described_class.new }
-      before do
-        allow(invalid_arguments).to receive(:puts)
-      end
-      it 'will return false if non numeric character' do
-        num = '#'
-        letter = 'h'
-        none_num_arg = invalid_arguments.check_num_and_letter?(num, letter)
+    context 'when arguments are invalid' do
+      before { allow(player_input).to receive(:puts) }
 
-        expect(none_num_arg).to eq(false)
-      end
-
-      it 'will return false if num is out of range' do
-        num = '23'
-        letter = 'c'
-        num_out_of_range = invalid_arguments.check_num_and_letter?(num, letter)
-
-        expect(num_out_of_range).to eq(false)
-      end
-
-      it 'will return false if letter is non letter' do
+      it 'returns false if letter is invalid' do
+        letter = '#'
         num = '4'
-        letter = '$'
-        non_letter_arg = invalid_arguments.check_num_and_letter?(num, letter)
-
-        expect(non_letter_arg).to eq(false)
+        result = player_input.check_letter_and_num?(letter, num)
+        expect(result).to eq(false)
       end
 
-      it 'will return false if letter is out of rage (a-h)' do
-        num = '5'
+      it 'returns false if letter is out of range' do
         letter = 'k'
-        out_of_range_char = invalid_arguments.check_num_and_letter?(num, letter)
+        num = '5'
+        result = player_input.check_letter_and_num?(letter, num)
+        expect(result).to eq(false)
+      end
 
-        expect(out_of_range_char).to eq(false)
+      it 'returns false if num is invalid' do
+        letter = 'c'
+        num = '$'
+        result = player_input.check_letter_and_num?(letter, num)
+        expect(result).to eq(false)
+      end
+
+      it 'returns false if num is out of range' do
+        letter = 'b'
+        num = '9'
+        result = player_input.check_letter_and_num?(letter, num)
+        expect(result).to eq(false)
       end
     end
   end
@@ -163,34 +152,28 @@ RSpec.describe Player do
     end
   end
 
-  describe '#ask_assign-colors' do
+  describe '#ask_assign_colors' do
     subject(:player_color) { described_class.new }
 
-    context 'when player input the correct color' do
-      before do
-        allow(player_color).to receive(:puts)
-      end
-      it 'will assign player input to @color' do
-        allow(player_color).to receive(:gets).and_return('black')
+    context 'when player inputs a correct color' do
+      before { allow(player_color).to receive(:puts) }
 
+      it 'assigns :black if input is "black"' do
+        allow(player_color).to receive(:gets).and_return('black')
         expect { player_color.ask_assign_colors }.to change { player_color.color }.from(nil).to(:black)
       end
 
-      it 'will work if the player input is white' do
+      it 'assigns :white if input is "white"' do
         allow(player_color).to receive(:gets).and_return('white')
-
         expect { player_color.ask_assign_colors }.to change { player_color.color }.from(nil).to(:white)
       end
     end
 
-    context 'when the player input is invalid' do
-      before do
-        allow(player_color).to receive(:puts)
-      end
+    context 'when the input is invalid' do
+      before { allow(player_color).to receive(:puts) }
 
-      it 'will not save the wrong inputs' do
-        allow(player_color).to receive(:gets).and_return('sdf', '#$!', 'qouf83hh', 'white')
-
+      it 'keeps asking until it gets valid input' do
+        allow(player_color).to receive(:gets).and_return('sdf', '123', 'w', 'white')
         expect { player_color.ask_assign_colors }.to change { player_color.color }.from(nil).to(:white)
       end
     end
