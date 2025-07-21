@@ -55,14 +55,59 @@ RSpec.describe MoveValidator do
     end
   end
 
-  describe '#empty_cell?' do
-    context 'when the source square has a piece' do
+  describe '#occupied_source_cell?' do
+    context 'when the source square is occupied' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
       before do
-        let(:board) { double('board', board: Array.new(8) { Array.new(8, '') }) }
-        board[7][0] = "\u2656"
+        board[7][0] = "\u2656" # rook at a1
+        board[7][1] = "\u2658" # knight at b1
+        board[7][3] = "\u2655" # queen at d1
       end
-      xit 'will return true' do
-        []
+      it 'will return true' do
+        input = [[7, 0], [7, 1]]
+        cell_is_occupied = validator.occupied_source_cell?(board, input)
+
+        expect(cell_is_occupied).to eq(true)
+      end
+
+      it 'will return true for knight position' do
+        input = [[7, 1], [7, 6]]
+        cell_is_occupied = validator.occupied_source_cell?(board, input)
+
+        expect(cell_is_occupied).to eq(true)
+      end
+
+      it 'will return true for queen position' do
+        input = [[7, 3], [7, 6]]
+        cell_is_occupied = validator.occupied_source_cell?(board, input)
+
+        expect(cell_is_occupied).to eq(true)
+      end
+    end
+
+    context 'when the source square is empty' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      it 'will return false' do
+        input = [[7, 0], [7, 1]]
+        cell_is_empty = validator.occupied_source_cell?(board, input)
+
+        expect(cell_is_empty).to eq(false)
+      end
+
+      it 'will return false on other empty cell' do
+        input = [[0, 0], [0, 7]]
+        cell_is_empty = validator.occupied_source_cell?(board, input)
+
+        expect(cell_is_empty).to eq(false)
+      end
+
+      it 'will return false on any empty inbound cell' do
+        input = [[0, 2], [0, 5]]
+        cell_is_empty = validator.occupied_source_cell?(board, input)
+
+        expect(cell_is_empty).to eq(false)
       end
     end
   end

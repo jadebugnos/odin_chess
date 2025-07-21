@@ -11,12 +11,12 @@ module MoveValidator
   # [ ] Are castling/en passant/promotion rules followed if applicable?
 
   def check_if_valid_move?(input, board, color)
-    check_input_format?(input) &&         # [ ] Is the input format like "e2"?
-      empty_source_cell?(board, input) && # [ ] Does the source square have a piece?
+    check_input_format?(input) &&            # [ ] Is the input format like "e2"?
+      occupied_source_cell?(board, input) && # [ ] Does the source square have a piece?
       check_players_turn?(color, input) &&  # [ ] Is it the correct player's turn?
       check_piece_legal_move?(input) &&     # [ ] Is the move allowed by the piece type?
       check_clear_path?(input) &&           # [ ] Is the path clear (for sliding pieces)?
-      empty_destination_cell(input)         # [ ] Is the destination valid (empty or enemy)?
+      empty_destination_cell?(input)        # [ ] Is the destination valid (empty or enemy)?
   end
 
   # checks if the input is in the correct format (e.g., "e2", "g5")
@@ -26,7 +26,15 @@ module MoveValidator
     input.flatten.all? { |item| item.between?(0, 7) }
   end
 
-  def empty_source_cell?(board, input); end
+  # check the source cell since input is [[x, y] [x, y]] and the first
+  # element is the source cell. will return false if cell is empty otherwise return true
+  def occupied_source_cell?(board, input)
+    x, y = input[0]
+
+    return false if board[x][y] == ''
+
+    true
+  end
 
   def check_players_turn?(color, input); end
 
@@ -34,5 +42,5 @@ module MoveValidator
 
   def check_clear_path?(input); end
 
-  def empty_destination_cell(input); end
+  def empty_destination_cell?(input); end
 end
