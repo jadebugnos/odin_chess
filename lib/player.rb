@@ -1,5 +1,9 @@
+require_relative '../lib/input_helper'
+
 class Player # rubocop:disable Metrics/ClassLength
   attr_accessor :name, :color
+
+  include InputHelper
 
   def initialize(name = nil, color = nil)
     @name = name
@@ -17,7 +21,7 @@ class Player # rubocop:disable Metrics/ClassLength
       break if move.length == 2 # Expecting 2 steps: from → to
     end
 
-    move
+    convert_input(move)
   end
 
   # validates player input

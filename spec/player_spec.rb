@@ -15,13 +15,9 @@ RSpec.describe Player do
 
       let(:player_input) { player_move.validate_player_move }
 
-      it 'will return an array with 2 elements' do
-        result = %w[a1 a4]
+      it 'will return an array with converted indices' do
+        result = [[7, 0], [4, 0]]
         expect(player_input).to eql(result)
-      end
-
-      it 'will contain valid chess coordinates with letter first' do
-        expect(player_input).to all(match(/\A[a-h][1-8]\z/))
       end
     end
 
