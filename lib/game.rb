@@ -9,6 +9,7 @@ class ChessGame
     @player_two = nil
     @first_to_move = nil
     @second_to_move = nil
+    @current_player = nil
   end
 
   def play_game
@@ -55,10 +56,16 @@ class ChessGame
   # - if the move is within the piece legal moves
   # - if the move is going into an empty cell or not
   def execute_moves
-    white_move = @first_to_move.validate_player_move
-    @board.update_board(white_move)
-    black_move = @second_to_move.validate_player_move
-    @board.update_board(black_move)
+    move = nil
+
+    loop do
+      move = @current_player.validate_player_move
+
+      break if check_if_valid_move?(move)
+    end
+
+    @board.update_board(move)
+    switch_turn
   end
 
   def set_move_order
@@ -69,6 +76,12 @@ class ChessGame
       @first_to_move = @player_two
       @second_to_move = @player_one
     end
+
+    @current_player = @first_to_move
+  end
+
+  def switch_turn
+    @current_player = @current_player == @first_to_move ? @second_to_move : @first_to_move
   end
 
   def game_intro
