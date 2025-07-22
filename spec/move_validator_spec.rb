@@ -113,6 +113,53 @@ RSpec.describe MoveValidator do
   end
 
   describe '#check_players_turn?' do
+    context "when it is the current player's turn" do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+      before do
+        board[7][0] = "\u2656"
+        board[0][0] = "\u265C"
+      end
+
+      it 'will return true' do
+        input = [[7, 0], [0, 0]]
+        turn = :white
+        current_player = validator.check_players_turn?(turn, input, board)
+
+        expect(current_player).to eq(true)
+      end
+
+      it 'returns true for black pieces' do
+        input = [[0, 0], [0, 7]]
+        turn = :black
+        current_player = validator.check_players_turn?(turn, input, board)
+
+        expect(current_player).to eq(true)
+      end
+    end
+
+    context "when it is not the current player's turn" do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+      before do
+        board[7][0] = "\u2656"
+        board[0][2] = "\u265D"
+      end
+
+      it 'will return false if black player moves white pieces' do
+        input = [[7, 0], [7, 7]]
+        turn = :black
+        current_player = validator.check_players_turn?(turn, input, board)
+
+        expect(current_player).to eq(false)
+      end
+
+      it 'will return false of white player moves black pieces' do
+        input = [[0, 2], [0, 5]]
+        turn = :white
+        current_player = validator.check_players_turn?(turn, input, board)
+
+        expect(current_player).to eq(false)
+      end
+    end
   end
 
   describe 'check_piece_legal_move?' do
