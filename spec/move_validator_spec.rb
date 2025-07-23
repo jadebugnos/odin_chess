@@ -163,6 +163,47 @@ RSpec.describe MoveValidator do
   end
 
   describe 'check_piece_legal_move?' do
+    context 'when the chosen piece allows the move' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      before do
+        board[6][4] = "\u2659" # White pawn at e2
+
+        piece = PieceIndex::PIECE_HASH[:white]["\u2659"]
+        allow(piece).to receive(:legal_move?)
+          .with(:white, [[6, 4], [4, 4]])
+          .and_return(true)
+      end
+
+      it 'returns true' do
+        color = :white
+        player_move = [[6, 4], [4, 4]] # white pawn e2 → e4
+        legal_move = validator.check_piece_legal_move?(color, player_move, board)
+
+        expect(legal_move).to eq(true)
+      end
+    end
+
+    context "when the chosen piece doesn't allow the move" do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      before do
+        board[7][0] = "\u2656" # White rook at a1
+
+        piece = PieceIndex::PIECE_HASH[:white]["\u2659"]
+        allow(piece).to receive(:legal_move?)
+          .with(:white, [[6, 4], [4, 4]])
+          .and_return(true)
+      end
+
+      it 'returns false' do
+        color = :white
+        player_move = [[7, 0], [6, 1]] # a1 → b2 (illegal for rook)
+        illegal_move = validator.check_piece_legal_move?(color, player_move, board)
+
+        expect(illegal_move).to eq(false)
+      end
+    end
   end
 
   describe 'check_clear_path?' do

@@ -1,4 +1,5 @@
 require_relative '../lib/positions'
+require_relative '../lib/piece_index'
 
 module MoveValidator
   # this will be a method wrapper for all move validation:
@@ -16,7 +17,7 @@ module MoveValidator
     check_input_format?(input) &&            # [ ] Is the input format like "e2"?
       occupied_source_cell?(board, input) && # [ ] Does the source square have a piece?
       check_players_turn?(turn, input, board) && # [ ] Is it the correct player's turn?
-      check_piece_legal_move?(input) &&     # [ ] Is the move allowed by the piece type?
+      check_piece_legal_move?(color, input, board) && # [ ] Is the move allowed by the piece type?
       check_clear_path?(input) &&           # [ ] Is the path clear (for sliding pieces)?
       empty_destination_cell?(input)        # [ ] Is the destination valid (empty or enemy)?
   end
@@ -45,7 +46,12 @@ module MoveValidator
     Positions::INITIAL_POSITIONS[turn].key?(icon)
   end
 
-  def check_piece_legal_move?(input); end
+  def check_piece_legal_move?(color, player_move, board)
+    x, y = player_move[0]
+    icon = board[x][y]
+
+    PieceIndex::PIECE_HASH[color][icon].legal_move?(color, player_move)
+  end
 
   def check_clear_path?(input); end
 
