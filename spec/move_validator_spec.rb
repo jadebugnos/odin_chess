@@ -171,14 +171,14 @@ RSpec.describe MoveValidator do
 
         piece = PieceIndex::PIECE_HASH[:white]["\u2659"]
         allow(piece).to receive(:legal_move?)
-          .with(:white, [[6, 4], [4, 4]])
+          .with([[6, 4], [4, 4]], board, :white)
           .and_return(true)
       end
 
       it 'returns true' do
         color = :white
         player_move = [[6, 4], [4, 4]] # white pawn e2 → e4
-        legal_move = validator.check_piece_legal_move?(color, player_move, board)
+        legal_move = validator.check_piece_legal_move?(player_move, board, color)
 
         expect(legal_move).to eq(true)
       end
@@ -190,16 +190,16 @@ RSpec.describe MoveValidator do
       before do
         board[7][0] = "\u2656" # White rook at a1
 
-        piece = PieceIndex::PIECE_HASH[:white]["\u2659"]
+        piece = PieceIndex::PIECE_HASH[:white]["\u2656"]
         allow(piece).to receive(:legal_move?)
-          .with(:white, [[6, 4], [4, 4]])
-          .and_return(true)
+          .with([[7, 0], [6, 1]], board, :white)
+          .and_return(false)
       end
 
       it 'returns false' do
         color = :white
         player_move = [[7, 0], [6, 1]] # a1 → b2 (illegal for rook)
-        illegal_move = validator.check_piece_legal_move?(color, player_move, board)
+        illegal_move = validator.check_piece_legal_move?(player_move, board, color)
 
         expect(illegal_move).to eq(false)
       end
