@@ -46,11 +46,11 @@ module MoveValidator
     Positions::INITIAL_POSITIONS[turn].key?(icon)
   end
 
-  def check_piece_legal_move?(color, player_move, board)
+  def check_piece_legal_move?(player_move, board, color)
     x, y = player_move[0]
     icon = board[x][y]
 
-    PieceIndex::PIECE_HASH[color][icon].legal_move?(color, player_move)
+    PieceIndex::PIECE_HASH[color][icon].legal_move?(player_move, board, color)
   end
 
   def check_clear_path?(input); end
