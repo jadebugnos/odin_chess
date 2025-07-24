@@ -9,8 +9,15 @@ class Pawn < ChessPiece
 
   # Overrides the inherited method to add pawn-specific rules.
   # Includes additional logic to restrict two-step moves to the initial position.
-  def legal_move?(color, move)
-    return false unless super(color, move)
+  def legal_move?(move, _board, color)
+    legal_moves = color == :white ? @legal_moves_white : @legal_moves_black
+    from = move[0]
+    to = move[1]
+
+    # Calculate delta (to - from)
+    delta_move = [to[0] - from[0], to[1] - from[1]]
+
+    legal_moves.include?(delta_move)
 
     handle_initial_position?(color, move)
   end
