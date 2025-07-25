@@ -17,9 +17,8 @@ module MoveValidator
     check_input_format?(input) &&            # [ ] Is the input format like "e2"?
       occupied_source_cell?(board, input) && # [ ] Does the source square have a piece?
       check_players_turn?(turn, input, board) && # [ ] Is it the correct player's turn?
-      check_piece_legal_move?(color, input, board) && # [ ] Is the move allowed by the piece type?
-      check_clear_path?(input) &&           # [ ] Is the path clear (for sliding pieces)?
-      empty_destination_cell?(input)        # [ ] Is the destination valid (empty or enemy)?
+      check_piece_legal_move?(color, input, board) # [ ] Is the move allowed by the piece type?
+    # empty_destination_cell?(input)
   end
 
   # checks if the input is in the correct format (e.g., "e2", "g5")
@@ -46,14 +45,12 @@ module MoveValidator
     Positions::INITIAL_POSITIONS[turn].key?(icon)
   end
 
-  def check_piece_legal_move?(player_move, board, color)
+  def check_piece_legal_move?(color, player_move, board)
     x, y = player_move[0]
     icon = board[x][y]
 
     PieceIndex::PIECE_HASH[color][icon].legal_move?(player_move, board, color)
   end
-
-  def check_clear_path?(input); end
 
   def empty_destination_cell?(input); end
 end

@@ -178,7 +178,7 @@ RSpec.describe MoveValidator do
       it 'returns true' do
         color = :white
         player_move = [[6, 4], [4, 4]] # white pawn e2 → e4
-        legal_move = validator.check_piece_legal_move?(player_move, board, color)
+        legal_move = validator.check_piece_legal_move?(color, player_move, board)
 
         expect(legal_move).to eq(true)
       end
@@ -199,7 +199,7 @@ RSpec.describe MoveValidator do
       it 'returns false' do
         color = :white
         player_move = [[7, 0], [6, 1]] # a1 → b2 (illegal for rook)
-        illegal_move = validator.check_piece_legal_move?(player_move, board, color)
+        illegal_move = validator.check_piece_legal_move?(color, player_move, board)
 
         expect(illegal_move).to eq(false)
       end

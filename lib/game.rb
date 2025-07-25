@@ -1,8 +1,11 @@
 require_relative 'color_players/black_player'
 require_relative 'color_players/white_player'
+require_relative 'move_validator'
 
 # this file defines the ChessGame class which holds Game logic
 class ChessGame
+  include MoveValidator
+
   def initialize(board)
     @board = board
     @player_one = nil
@@ -18,7 +21,7 @@ class ChessGame
   end
 
   def prepare_game
-    slow_print(game_intro)
+    # slow_print(game_intro)
     @board.set_up_pieces
     set_up_player_infos
   end
@@ -61,7 +64,7 @@ class ChessGame
     loop do
       move = @current_player.validate_player_move
 
-      break if check_if_valid_move?(move)
+      break if check_if_valid_move?(move, @board.board, @current_player.color)
     end
 
     @board.update_board(move)
