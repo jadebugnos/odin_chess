@@ -38,8 +38,9 @@ class ChessPiece
   # - the cell is empty
   # - their is no obstruction along the way unless it's horse
   def move_piece(board, current, target)
+    icon = board[current[0]][current[1]]
     board[current[0]][current[1]] = ''
-    board[target[0]][target[1]] = @unicode
+    board[target[0]][target[1]] = icon
   end
 
   private

@@ -1,25 +1,28 @@
 require_relative '../pieces'
 
 class Pawn < ChessPiece
-  def initialize # rubocop:disable Lint/MissingSuper
-    @unicode = ["\u2659", "\u265F"] # [white, black]
-    @legal_moves_white = [[-1, 0], [-2, 0], [-1, -1], [-1, 1]]
-    @legal_moves_black = [[1, 0], [2, 0], [1, -1], [1, 1]]
+  WHITE_MOVES = [[-1, 0], [-2, 0]].freeze
+  BLACK_MOVES = [[1, 0], [2, 0]].freeze
+
+  WHITE_CAPTURE_DELTAS = [[-1, -1], [-1, 1]].freeze
+  BLACK_CAPTURE_DELTAS = [[1, -1], [1, 1]].freeze
+
+  def initialize
+    unicode = ["\u2659", "\u265F"] # [white, black]
+    super(unicode)
   end
 
   # Overrides the inherited method to add pawn-specific rules.
   # Includes additional logic to restrict two-step moves to the initial position.
   def legal_move?(move, _board, color)
-    legal_moves = color == :white ? @legal_moves_white : @legal_moves_black
+    legal_moves = color == :white ? WHITE_MOVES : BLACK_MOVES
     from = move[0]
     to = move[1]
 
     # Calculate delta (to - from)
     delta_move = [to[0] - from[0], to[1] - from[1]]
 
-    legal_moves.include?(delta_move)
-
-    handle_initial_position?(color, move)
+    legal_moves.include?(delta_move) && handle_initial_position?(color, move)
   end
 
   private
