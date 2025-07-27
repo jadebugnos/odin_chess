@@ -206,9 +206,127 @@ RSpec.describe MoveValidator do
     end
   end
 
-  describe 'check_clear_path?' do
+  describe 'empty_destination?' do
+    context 'when the destination cell is empty' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      it 'will return true' do
+        player_move = [[0, 5], [3, 2]] # black bishop f8 → c5
+        color = :black
+        empty_cell = validator.empty_destination?(player_move, board, color)
+
+        expect(empty_cell).to eq(true)
+      end
+    end
+
+    context 'when the destination cell is not empty' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+      before do
+        board[3][2] = "\u265C"
+      end
+
+      it "will return false if the cell contain's piece with same color" do
+        player_move = [[0, 5], [3, 2]] # black bishop f8 → c5
+        color = :black
+        empty_cell = validator.empty_destination?(player_move, board, color)
+
+        expect(empty_cell).to eq(false)
+      end
+    end
+
+    context 'when the destination cell has an enemy piece' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+      before do
+        board[3][2] = "\u2659" # white pawn
+      end
+
+      it 'returns true (can capture enemy piece)' do
+        player_move = [[0, 5], [3, 2]] # black bishop f8 → c5
+        color = :black
+        result = validator.empty_destination?(player_move, board, color)
+
+        expect(result).to eq(true)
+      end
+    end
+
+    context 'when the destination is at the edge of the board' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      it 'returns true if the destination cell is empty' do
+        player_move = [[6, 7], [7, 7]] # e.g. pawn promotion
+        color = :white
+        result = validator.empty_destination?(player_move, board, color)
+
+        expect(result).to eq(true)
+      end
+    end
+
+    context 'when the destination is at position [0, 0]' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      it 'returns true if cell is empty' do
+        player_move = [[1, 0], [0, 0]]
+        color = :white
+        result = validator.empty_destination?(player_move, board, color)
+
+        expect(result).to eq(true)
+      end
+    end
+
+    context 'when a pawn moves forward into an empty square' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      it 'returns true' do
+        player_move = [[6, 4], [5, 4]] # white pawn e2 → e3
+        color = :white
+        result = validator.empty_destination?(player_move, board, color)
+
+        expect(result).to eq(true)
+      end
+    end
+
+    context 'when a pawn moves forward into an enemy piece' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      before do
+        board[5][4] = "\u265C" # black rook
+      end
+
+      it 'returns false (pawns can’t capture forward)' do
+        player_move = [[6, 4], [5, 4]] # white pawn e2 → e3
+        color = :white
+        result = validator.empty_destination?(player_move, board, color)
+
+        expect(result).to eq(false)
+      end
+    end
+
+    context 'when a pawn captures diagonally into an enemy piece' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      before do
+        board[5][5] = "\u265C" # black rook
+      end
+
+      it 'returns true (diagonal capture)' do
+        player_move = [[6, 4], [5, 5]] # white pawn e2 → f3
+        color = :white
+        result = validator.empty_destination?(player_move, board, color)
+
+        expect(result).to eq(true)
+      end
+    end
   end
 
-  describe 'check_destination_cell?' do
+  context 'when a pawn moves diagonally into an empty square' do
+    let(:board) { Array.new(8) { Array.new(8, '') } }
+
+    it 'returns false (no capture possible)' do
+      player_move = [[6, 4], [5, 5]] # white pawn e2 → f3
+      color = :white
+      result = validator.empty_destination?(player_move, board, color)
+
+      expect(result).to eq(false)
+    end
   end
 end

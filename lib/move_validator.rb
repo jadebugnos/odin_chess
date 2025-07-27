@@ -38,6 +38,7 @@ module MoveValidator
     true
   end
 
+  # Checks if the piece being moved belongs to the current player
   def check_players_turn?(turn, input, board)
     x, y = input[0]
     icon = board[x][y]
@@ -45,6 +46,7 @@ module MoveValidator
     Positions::INITIAL_POSITIONS[turn].key?(icon)
   end
 
+  # Delegates move validation to the piece's `legal_move?` method
   def check_piece_legal_move?(color, player_move, board)
     x, y = player_move[0]
     icon = board[x][y]
@@ -52,5 +54,45 @@ module MoveValidator
     PieceIndex::PIECE_HASH[color][icon].legal_move?(player_move, board, color)
   end
 
-  def empty_destination_cell?(input); end
+  # remind me: TDD this method next to add functionality
+  # then add logic to #update_board in the Board class
+  def empty_destination?(move, board, color)
+    x, y = move[1]
+    piece = board[x][y]
+    pawn = board[move[0][0]][move[0][1]]
+
+    return pawn_valid_destination?(move, board, color) if piece_is_pawn?(pawn)
+
+    generic_valid_destination?(piece, color)
+  end
+
+  def generic_valid_destination?(piece, color)
+    ally, enemy = color == :black ? %i[black white] : %i[white black]
+
+    contains_enemy = Positions::INITIAL_POSITIONS[enemy].key?(piece)
+    contains_ally = Positions::INITIAL_POSITIONS[ally].key?(piece)
+
+    return true if piece == '' || contains_enemy
+    return false if contains_ally
+
+    false
+  end
+
+  def piece_is_pawn?(piece)
+    ["\u2659", "\u265F"].include?(piece)
+  end
+
+  # If the move is a normal forward move (not diagonal):
+  # - If the destination cell is empty, return true
+  # - If the destination cell has any piece (even enemy), return false
+
+  # If the move is a diagonal (capture move):
+  # - If the destination cell contains an enemy piece, return true
+  # - If the destination cell is empty or has a same-color piece, return false
+  def pawn_valid_destination?(move, board, color)
+    x, y = move[1]
+    piece = board[x][y]
+
+    
+  end
 end
