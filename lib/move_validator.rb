@@ -61,7 +61,7 @@ module MoveValidator
     piece = board[x][y]
     pawn = board[move[0][0]][move[0][1]]
 
-    return pawn_valid_destination?(move, board, color) if piece_is_pawn?(pawn)
+    return check_pawn_destination?(move, board, color, pawn) if piece_is_pawn?(pawn)
 
     generic_valid_destination?(piece, color)
   end
@@ -78,21 +78,13 @@ module MoveValidator
     false
   end
 
-  def piece_is_pawn?(piece)
-    ["\u2659", "\u265F"].include?(piece)
+  private
+
+  def check_pawn_destination?(move, board, color, pawn)
+    PieceIndex::PIECE_HASH[color][pawn].pawn_valid_destination?(move, board, color)
   end
 
-  # If the move is a normal forward move (not diagonal):
-  # - If the destination cell is empty, return true
-  # - If the destination cell has any piece (even enemy), return false
-
-  # If the move is a diagonal (capture move):
-  # - If the destination cell contains an enemy piece, return true
-  # - If the destination cell is empty or has a same-color piece, return false
-  def pawn_valid_destination?(move, board, color)
-    x, y = move[1]
-    piece = board[x][y]
-
-    
+  def piece_is_pawn?(piece)
+    ["\u2659", "\u265F"].include?(piece)
   end
 end
