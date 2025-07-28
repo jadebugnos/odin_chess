@@ -1,5 +1,6 @@
 require_relative '../pieces'
 require_relative '../positions'
+require 'pry-byebug'
 
 class Pawn < ChessPiece
   WHITE_MOVES = [[-1, 0], [-2, 0]].freeze
@@ -40,20 +41,20 @@ class Pawn < ChessPiece
     delta = handle_deltas(from_x, to_x, from_y, to_y)
     destination = board[to_x][to_y]
 
-    if normal.include?(delta)
-      if destination == ''
-        true
-      elsif board[to_x][to_y] != ''
-        false
-      end
-    elsif capture.include?(delta)
-      piece = color == :white ? :black : :white
-      icon = board[to_x][to_y]
-      Positions::INITIAL_POSITIONS[piece].key?(icon) || false
-    end
+    return true if normal.include?(delta) && destination == ''
+    return true if capture.include?(delta) && destination_has_enemy?(color, destination)
+
+    false
   end
 
   private
+
+  def destination_has_enemy?(color, icon)
+    clean_icon = icon.gsub("\uFE0E", '') # remove variation selector if present
+    enemy_color = color == :white ? :black : :white
+
+    Positions::INITIAL_POSITIONS[enemy_color].key?(clean_icon)
+  end
 
   # Pawn-specific helper for checking if a two-step move is allowed.
   # Returns false if the pawn attempts a two-step move from a non-starting row.
@@ -73,10 +74,9 @@ class Pawn < ChessPiece
 end
 
 # board = Array.new(8) { Array.new(8, '') }
-# board[2][3] = '♙'
-# move = [[1, 4], [2, 3]]
-# color = :black
+# board[5][3] = '♟︎' # black pawn (enemy)
+# move = [[6, 4], [5, 3]] # white pawn capturing diagonally
+# color = :white
 
 # pawn = Pawn.new
-
 # pawn.pawn_valid_destination?(move, board, color)
