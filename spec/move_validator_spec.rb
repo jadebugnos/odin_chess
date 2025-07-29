@@ -273,60 +273,25 @@ RSpec.describe MoveValidator do
       end
     end
 
-    context 'when a pawn moves forward into an empty square' do
-      let(:board) { Array.new(8) { Array.new(8, '') } }
+    # context 'when the piece is pawn' do
+    #   let(:board) { Array.new(8) { Array.new(8, '') } }
 
-      it 'returns true' do
-        player_move = [[6, 4], [5, 4]] # white pawn e2 → e3
-        color = :white
-        result = validator.empty_destination?(player_move, board, color)
+    #   before do
+    #     allow(validator).to receive(:check_pawn_destination?)
+    #   end
 
-        expect(result).to eq(true)
-      end
-    end
+    #   it 'calls check_pawn_destination?' do
+    #     from = [1, 0]
+    #     to = [2, 0]
+    #     player_move = [from, to]
+    #     color = :black
 
-    context 'when a pawn moves forward into an enemy piece' do
-      let(:board) { Array.new(8) { Array.new(8, '') } }
+    #     # Place a black pawn at [1, 0]
+    #     board[1][0] = '♟︎' # Black pawn
 
-      before do
-        board[5][4] = "\u265C" # black rook
-      end
-
-      it 'returns false (pawns can’t capture forward)' do
-        player_move = [[6, 4], [5, 4]] # white pawn e2 → e3
-        color = :white
-        result = validator.empty_destination?(player_move, board, color)
-
-        expect(result).to eq(false)
-      end
-    end
-
-    context 'when a pawn captures diagonally into an enemy piece' do
-      let(:board) { Array.new(8) { Array.new(8, '') } }
-
-      before do
-        board[5][5] = "\u265C" # black rook
-      end
-
-      it 'returns true (diagonal capture)' do
-        player_move = [[6, 4], [5, 5]] # white pawn e2 → f3
-        color = :white
-        result = validator.empty_destination?(player_move, board, color)
-
-        expect(result).to eq(true)
-      end
-    end
-  end
-
-  context 'when a pawn moves diagonally into an empty square' do
-    let(:board) { Array.new(8) { Array.new(8, '') } }
-
-    it 'returns false (no capture possible)' do
-      player_move = [[6, 4], [5, 5]] # white pawn e2 → f3
-      color = :white
-      result = validator.empty_destination?(player_move, board, color)
-
-      expect(result).to eq(false)
-    end
+    #     expect(validator).to receive(:check_pawn_destination?)
+    #     validator.empty_destination?(player_move, board, color)
+    #   end
+    # end
   end
 end

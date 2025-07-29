@@ -31,18 +31,6 @@ class ChessPiece
     valid_path?(start, destination, delta, board)
   end
 
-  # moves the piece to a target cell
-  # use this method only if all requirements are met:
-  # - move is legal depending on the piece legal moves
-  # - target cell is inbound the board
-  # - the cell is empty
-  # - their is no obstruction along the way unless it's horse
-  def move_piece(board, current, target)
-    icon = board[current[0]][current[1]]
-    board[current[0]][current[1]] = ''
-    board[target[0]][target[1]] = icon
-  end
-
   private
 
   # Returns the step direction between two values:
