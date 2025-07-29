@@ -3,6 +3,8 @@ require_relative 'positions'
 
 # this file holds the ChessBoard class which holds all game board logic
 class ChessBoard
+  attr_accessor :board
+
   def initialize
     @board = Array.new(8) { Array.new(8, '') }
     @chess_pieces = ChessPiece.new
@@ -33,7 +35,14 @@ class ChessBoard
     puts '    ' + ('a'..'h').map { |c| c.center(4) }.join # rubocop:disable Style/StringConcatenation
   end
 
-  def update_board; end
+  # moves the piece to a target cell
+  def move_piece(move, board)
+    (from_x, from_y), (to_x, to_y) = move
+
+    icon = board[from_x][from_y]
+    board[from_x][from_y] = ''
+    board[to_x][to_y] = icon
+  end
 
   private
 
