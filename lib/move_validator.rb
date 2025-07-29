@@ -1,5 +1,6 @@
 require_relative '../lib/positions'
 require_relative '../lib/piece_index'
+require_relative '../lib/validation_messages'
 
 module MoveValidator
   # this will be a method wrapper for all move validation:
@@ -13,12 +14,33 @@ module MoveValidator
   # [ ] Does the move avoid putting own king in check?
   # [ ] Are castling/en passant/promotion rules followed if applicable?
 
-  def check_if_valid_move?(input, board, color)
-    check_input_format?(input) &&            # [ ] Is the input format like "e2"?
-      occupied_source_cell?(board, input) && # [ ] Does the source square have a piece?
-      check_players_turn?(turn, input, board) && # [ ] Is it the correct player's turn?
-      check_piece_legal_move?(color, input, board) # [ ] Is the move allowed by the piece type?
-    # empty_destination_cell?(input)
+  def check_if_valid_move?(input, board, color) # rubocop:disable Metrics/MethodLength
+    unless check_input_format?(input)
+      ValidationMessages.invalid_format(input)
+      return false
+    end
+
+    unless occupied_source_cell?(board, input)
+      ValidationMessages.empty_source_cell(input[0])
+      return false
+    end
+
+    unless check_players_turn?(color, input, board)
+      ValidationMessages.wrong_turn(input[0], color)
+      return false
+    end
+
+    unless check_piece_legal_move?(color, input, board)
+      ValidationMessages.illegal_piece_move(input[0])
+      return false
+    end
+
+    unless empty_destination?(input, board, color)
+      ValidationMessages.invalid_destination(input[1])
+      return false
+    end
+
+    true
   end
 
   # checks if the input is in the correct format (e.g., "e2", "g5")
