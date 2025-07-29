@@ -37,6 +37,7 @@ class ChessGame
     loop do
       @board.display_board
       handle_moves
+      switch_turn
     end
   end
 
@@ -60,15 +61,16 @@ class ChessGame
   # - if the move is going into an empty cell or not
   def execute_moves
     move = nil
+    board = @board.board
+    color = @current_player.color
 
     loop do
       move = @current_player.validate_player_move
 
-      break if check_if_valid_move?(move, @board.board, @current_player.color)
+      break if check_if_valid_move?(move, board, color)
     end
 
-    @board.update_board(move)
-    switch_turn
+    @board.move_piece(move, board)
   end
 
   def set_move_order
