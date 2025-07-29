@@ -20,19 +20,22 @@ class ChessGame
     run_game
   end
 
+  # preparing game requirements before starting
   def prepare_game
-    # slow_print(game_intro)
+    slow_print(game_intro)
     @board.set_up_pieces
-    set_up_player_infos
+    initialize_players
   end
 
-  def set_up_player_infos
+  # player initialization
+  def initialize_players
     @player_one = Player.new
     color = @player_one.handle_name_and_color
     @player_two = Player.new
     @player_two.handle_name_and_color(color)
   end
 
+  # main game loop
   def run_game
     loop do
       @board.display_board
@@ -41,11 +44,7 @@ class ChessGame
     end
   end
 
-  # fix me: refactor to use the @player_one and @player_two
-  # instead of @player. allow switching moves between each players
-  # requirements:
-  # - it should allow white player to make the first move
-  # - it should update the board before the next player's move
+  # Manages turn order and executes player moves
   def handle_moves
     set_move_order if @first_to_move.nil?
     execute_moves
@@ -53,12 +52,7 @@ class ChessGame
 
   private
 
-  # remind me: the update_board is not yet implemented
-  # make sure to TDD it. and validate_player_move should
-  # all be checking this:
-  # - if the move is within the board boundaries
-  # - if the move is within the piece legal moves
-  # - if the move is going into an empty cell or not
+  # Loops until the player provides a valid move, then updates the board
   def execute_moves
     move = nil
     board = @board.board
@@ -73,6 +67,7 @@ class ChessGame
     @board.move_piece(move, board)
   end
 
+  # sets up players turn order
   def set_move_order
     if @player_one.color == :white
       @first_to_move = @player_one

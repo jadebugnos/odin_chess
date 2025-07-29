@@ -5,12 +5,12 @@ require_relative '../lib/validation_messages'
 module MoveValidator
   # this will be a method wrapper for all move validation:
   # checklist of all the validations:
-  # [ ] Is the input in the correct format? (e.g., "e2", "g5")
-  # [ ] Does the source square have a piece?
-  # [ ] Is it that player's turn?
-  # [ ] Is the move allowed by the piece type?
-  # [ ] Is the path clear (for sliding pieces)?
-  # [ ] Is the destination valid (empty or enemy)?
+  # [x] Is the input in the correct format?
+  # [x] Does the source square have a piece?
+  # [x] Is it that player's turn?
+  # [x] Is the move allowed by the piece type?
+  # [x] Is the path clear (for sliding pieces)?
+  # [x] Is the destination valid (empty or enemy)?
   # [ ] Does the move avoid putting own king in check?
   # [ ] Are castling/en passant/promotion rules followed if applicable?
 
@@ -43,7 +43,7 @@ module MoveValidator
     true
   end
 
-  # checks if the input is in the correct format (e.g., "e2", "g5")
+  # checks if the input is in the correct format
   def check_input_format?(input)
     return false if input.include?(nil)
 
@@ -79,15 +79,16 @@ module MoveValidator
   # remind me: TDD this method next to add functionality
   # then add logic to #update_board in the Board class
   def empty_destination?(move, board, color)
-    x, y = move[1]
-    piece = board[x][y]
-    pawn = board[move[0][0]][move[0][1]]
+    (from_x, from_y), (to_x, to_y) = move
+    piece = board[to_x][to_y]
+    pawn = board[from_x][from_y]
 
     return check_pawn_destination?(move, board, color, pawn) if piece_is_pawn?(pawn)
 
     generic_valid_destination?(piece, color)
   end
 
+  # this method handles the destination validation for all pieces except the pawn
   def generic_valid_destination?(piece, color)
     ally, enemy = color == :black ? %i[black white] : %i[white black]
 

@@ -20,23 +20,28 @@ class Pawn < ChessPiece
     pawn_valid_destination?(move, board, color)
   end
 
-  # If the move is a normal forward move (not diagonal):
-  # - If the destination cell is empty, return true
-  # - If the destination cell has any piece (even enemy), return false
-
-  # If the move is a diagonal (capture move):
-  # - If the destination cell contains an enemy piece, return true
-  # - If the destination cell is empty or has a same-color piece, return false
+  # Checks if a pawn move is valid based on movement rules and the board state
   def pawn_valid_destination?(move, board, color)
+    # Determine move and capture patterns based on the pawn's color
     normal, capture = color == :white ? [WHITE_MOVES, WHITE_CAPTURE_DELTAS] : [BLACK_MOVES, BLACK_CAPTURE_DELTAS]
-    from_x, from_y = move[0]
-    to_x, to_y = move[1]
+
+    # Destructure the move into starting and ending coordinates
+    (from_x, from_y), (to_x, to_y) = move
+
+    # Calculate the difference (delta) between from and to coordinates
     delta = handle_deltas(from_x, to_x, from_y, to_y)
+
+    # Get the piece (if any) at the destination square
     destination = board[to_x][to_y]
 
+    # Valid normal move: if the delta is in the normal list,
+    # the destination is empty, and the pawn is allowed to move two squares (from its starting row)
     return true if normal.include?(delta) && destination == '' && handle_initial_position?(color, move)
+
+    # Valid capture move: if the delta is a capture delta and the destination contains an enemy piece
     return true if capture.include?(delta) && destination_has_enemy?(color, destination)
 
+    # If none of the valid conditions are met, return false
     false
   end
 

@@ -12,8 +12,7 @@ class ChessPiece
   # For fixed-delta pieces (like knights), uses pattern-matching.
   # For directional pieces (like rooks or bishops), checks direction and path clearance.
   def legal_move?(move, board, *_args)
-    from_x, from_y = move[0]
-    to_x, to_y     = move[1]
+    (from_x, from_y), (to_x, to_y) = move
 
     # Use pattern-matching logic for fixed-move pieces (e.g., knight)
     return matches_pattern?(move) if FIXED_DELTA_PIECES.include?(board[from_x][from_y])
@@ -78,11 +77,6 @@ class ChessPiece
     false
   end
 
-  # returns true if the players move is legal otherwise false.
-  # Parameters:
-  # - color: Symbol representing the player's color (:white or :black).
-  #          Used to select the appropriate legal move set.
-  # - move: An array of two coordinates [from, to], where each is a [row, col] pair.
   def matches_pattern?(move)
     from = move[0]
     to = move[1]
