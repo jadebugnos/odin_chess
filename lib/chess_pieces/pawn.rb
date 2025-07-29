@@ -16,15 +16,8 @@ class Pawn < ChessPiece
 
   # Overrides the inherited method to add pawn-specific rules.
   # Includes additional logic to restrict two-step moves to the initial position.
-  def legal_move?(move, _board, color)
-    legal_moves = color == :white ? WHITE_MOVES : BLACK_MOVES
-    from = move[0]
-    to = move[1]
-
-    # Calculate delta (to - from)
-    delta_move = [to[0] - from[0], to[1] - from[1]]
-
-    legal_moves.include?(delta_move) && handle_initial_position?(color, move)
+  def legal_move?(move, board, color)
+    pawn_valid_destination?(move, board, color)
   end
 
   # If the move is a normal forward move (not diagonal):
@@ -41,7 +34,7 @@ class Pawn < ChessPiece
     delta = handle_deltas(from_x, to_x, from_y, to_y)
     destination = board[to_x][to_y]
 
-    return true if normal.include?(delta) && destination == ''
+    return true if normal.include?(delta) && destination == '' && handle_initial_position?(color, move)
     return true if capture.include?(delta) && destination_has_enemy?(color, destination)
 
     false
@@ -72,11 +65,3 @@ class Pawn < ChessPiece
     true
   end
 end
-
-# board = Array.new(8) { Array.new(8, '') }
-# board[5][3] = '♟︎' # black pawn (enemy)
-# move = [[6, 4], [5, 3]] # white pawn capturing diagonally
-# color = :white
-
-# pawn = Pawn.new
-# pawn.pawn_valid_destination?(move, board, color)
