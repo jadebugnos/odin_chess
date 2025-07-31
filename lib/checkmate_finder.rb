@@ -21,13 +21,14 @@ module CheckmateFinder
   # color - the current players color
   # board - A 2D array representing the Chessboard
   # start - the coordinates of the king piece
-  # delta - the direction in which to search
-  def diagonal_search?(color, board, start, delta)
-    ally, enemy = handle_ally_foe(color, :diagonal)
+  # delta - the directions in which to search
+  def directional_search?(color, board, start, delta, direction)
+    ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
     delta.any? do |delta|
       path_finder(start, delta, board) do |cell|
-        return false if ally.include?(cell)
+        next false if ally.include?(cell)
+        next false if friendly_enemies.include?(cell)
         return true if enemy.include?(cell)
 
         false
