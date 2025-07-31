@@ -8,13 +8,22 @@ module CheckmateFinder
   FIXED_BLACK_PIECE = ['♞', '♚', '♟'].freeze # Knight, King, Pawn
   FIXED_WHITE_PIECE = ['♘', '♔', '♙'].freeze # Knight, King, Pawn
 
+  ALL_BLACK_PIECES = ['♟', '♜', '♝', '♞', '♛', '♚'].freeze
+  ALL_WHITE_PIECES = ['♙', '♖', '♗', '♘', '♕', '♔'].freeze
+
+  DIRECTIONAL_PIECES = {
+    diagonal: { black: ['♝', '♛'], white: ['♗', '♕'] },
+    linear: { black: ['♜', '♛'], white: ['♖', '♕'] },
+    fixed: { black: ['♞', '♟'], white: ['♘', '♙'] }
+  }.freeze
+
   def checkmate?
     diagonal_search?
     linear_search?
     fixed_search?
   end
 
-  # diagonally search from the POV of King piece. returns true
+  # search based of a given delta from the POV of King piece. returns true
   # if the cell contains an enemy piece that captures with the same direction
   # otherwise returns false
   # parameters:
@@ -30,24 +39,20 @@ module CheckmateFinder
         next false if ally.include?(cell)
         next false if friendly_enemies.include?(cell)
         return true if enemy.include?(cell)
-
-        false
       end
     end
   end
 
+  def diagonal_search?; end
+
+  def linear_search?; end
+
+  def fixed_search?; end
+
   # private
 
-  # dynamically returns ally and enemy pieces based on color and delta
-  # - returns [ally_pieces_arr, enemy_pieces_arr]
-  def handle_ally_foe(color, direction)
-    pieces = {
-      diagonal: { black: DIAGONAL_BLACK_PIECE, white: DIAGONAL_WHITE_PIECE },
-      vertical: { black: LINEAR_BLACK_PIECE, white: LINEAR_WHITE_PIECE },
-      fixed: { black: FIXED_BLACK_PIECE, white: FIXED_WHITE_PIECE }
-    }
-
-    ally_color = color
+  # dynamically sort and returns ally, enemy pieces and threats based on color and delta
+  def identify_threats_and_allies(color, direction)
     enemy_color = color == :black ? :white : :black
 
     allies, all_enemies = color == :black ? [ALL_BLACK_PIECES, ALL_WHITE_PIECES] : [ALL_WHITE_PIECES, ALL_BLACK_PIECES]
@@ -84,10 +89,6 @@ module CheckmateFinder
   end
 end
 
-DummyClass = Class.new do
-  include CheckmateFinder
-end
-
-dummy = DummyClass.new
-p dummy.handle_ally_foe(:black, :fixed)
-
+# DummyClass = Class.new do
+#   include CheckmateFinder
+# end
