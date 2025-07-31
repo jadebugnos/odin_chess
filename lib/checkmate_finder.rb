@@ -49,7 +49,11 @@ module CheckmateFinder
     ally_color = color
     enemy_color = color == :black ? :white : :black
 
-    [pieces[direction][ally_color], pieces[direction][enemy_color]]
+    allies, all_enemies = color == :black ? [ALL_BLACK_PIECES, ALL_WHITE_PIECES] : [ALL_WHITE_PIECES, ALL_BLACK_PIECES]
+    threats = DIRECTIONAL_PIECES[direction][enemy_color]
+    friendly_enemies = all_enemies - threats
+
+    [allies, threats, friendly_enemies]
   end
 
   # search in a straight line depending on the given direction
