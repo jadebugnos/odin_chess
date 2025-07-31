@@ -60,7 +60,8 @@ module CheckmateFinder
     while inbound?(current_x, current_y)
       next_cell = board[current_x][current_y]
 
-      yield(next_cell) if block_given?
+      result = yield(next_cell) if block_given?
+      return result if [true, false].include?(result)
 
       current_x += delta[0]
       current_y += delta[1]
