@@ -58,7 +58,7 @@ module CheckmateFinder
     current_y = start[1] + delta[1]
 
     while inbound?(current_x, current_y)
-      next_cell = board[current_x, current_y]
+      next_cell = board[current_x][current_y]
 
       yield(next_cell) if block_given?
 
