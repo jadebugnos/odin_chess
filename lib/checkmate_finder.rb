@@ -1,3 +1,5 @@
+require 'pry-byebug'
+
 module CheckmateFinder
   ALL_BLACK_PIECES = ['♟', '♜', '♝', '♞', '♛', '♚'].freeze
   ALL_WHITE_PIECES = ['♙', '♖', '♗', '♘', '♕', '♔'].freeze
@@ -5,18 +7,24 @@ module CheckmateFinder
   DIRECTIONAL_PIECES = {
     diagonal: { black: ['♝', '♛'], white: ['♗', '♕'] },
     linear: { black: ['♜', '♛'], white: ['♖', '♕'] },
-    fixed: { black: ['♞'], white: ['♘'] }
+    leaper: { black: ['♞'], white: ['♘'] },
+    stepper: { black: ['♟'], white: ['♙'] },
+    royal: { black: ['♚'], white: ['♔'] }
   }.freeze
 
   DIAGONAL_DELTAS = [[-1, -1], [-1, 1], [1, -1], [1, 1]].freeze
   LINEAR_DELTAS   = [[-1, 0], [1, 0], [0, -1], [0, 1]].freeze
   KNIGHT_DELTAS   = [[-2, -1], [-2, 1], [-1, -2], [-1, 2],
                      [1, -2], [1, 2], [2, -1], [2, 1]].freeze
+  PAWN_DELTAS = { black: [[-1, -1], [-1, 1]], white: [[1, -1], [1, 1]] }.freeze
+  KING_DELTAS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]].freeze
 
   def check_found?(color, board, king_position)
-    diagonal_search?(color, board, king_position)
-    linear_search?(color, board, king_position)
-    fixed_search?(color, board, king_position)
+    diagonal_search?(color, board, king_position) ||
+      linear_search?(color, board, king_position) ||
+      knight_search?(color, board, king_position) ||
+      pawn_search?(color, board, king_position) ||
+      king_search?(color, board, king_position)
   end
 
   # search based of a given delta from the POV of King piece. returns true
@@ -31,7 +39,7 @@ module CheckmateFinder
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
     deltas.any? do |delta|
-      path_finder(start, delta, board) do |cell|
+      straight_path_traversal(start, delta, board) do |cell|
         next false if ally.include?(cell)
         next false if friendly_enemies.include?(cell)
         return true if enemy.include?(cell)
@@ -47,33 +55,51 @@ module CheckmateFinder
     directional_search?(color, board, king_position, LINEAR_DELTAS, :linear)
   end
 
-  def fixed_search?(color, board, king_position)
-    knight_found?(color, board, king_position, KNIGHT_DELTAS, :fixed)
-    pawn_found?(color, board, king_position)
+  def knight_search?(color, board, king_position)
+    fixed_search?(color, board, king_position, KNIGHT_DELTAS, :leaper)
   end
 
-  def pawn_found?(color, board, king_position)
-    
+  def pawn_search?(color, board, king_position)
+    enemy_color = color == :black ? :white : :black
+    pawn_deltas = PAWN_DELTAS[enemy_color]
+    fixed_search?(color, board, king_position, pawn_deltas, :stepper)
   end
 
-  def knight_found?(color, board, king_position, deltas, direction)
+  def king_search?(color, board, king_position)
+    fixed_search?(color, board, king_position, KING_DELTAS, :royal)
+  end
+
+  def fixed_search?(color, board, king_pos, deltas, direction)
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
+    fixed_path_traversal(board, king_pos, deltas) do |cell|
+      next false if ally.include?(cell) || friendly_enemies.include?(cell)
+
+      enemy.include?(cell)
+    end
+  end
+
+  # From the king's point of view, check surrounding squares based on fixed deltas
+  # to detect immediate threats (e.g., knights, pawns, king)
+  def fixed_path_traversal(board, king_position, deltas)
     deltas.any? do |dx, dy|
       current_x = king_position[0] + dx
       current_y = king_position[1] + dy
+
       next false unless inbound?(current_x, current_y)
 
       current_position = board[current_x][current_y]
-      next false if ally.include?(current_position)
-      next false if friendly_enemies.include?(current_position)
-      return true if enemy.include?(current_position)
+
+      yield(current_position) if block_given?
     end
   end
 
   # private
 
-  # dynamically sort and returns ally, enemy pieces and threats based on color and delta
+  # Given a color and piece type (direction), returns:
+  # - allied pieces
+  # - enemy pieces that threaten in this direction
+  # - enemy pieces that do not threaten in this direction
   def identify_threats_and_allies(color, direction)
     enemy_color = color == :black ? :white : :black
 
@@ -85,7 +111,7 @@ module CheckmateFinder
   end
 
   # search in a straight line depending on the given direction
-  def path_finder(start, delta, board)
+  def straight_path_traversal(start, delta, board)
     current_x = start[0] + delta[0]
     current_y = start[1] + delta[1]
 
@@ -102,6 +128,7 @@ module CheckmateFinder
     false
   end
 
+  # check if the coordinates is within board bounds
   def inbound?(current_x, current_y)
     current_x.between?(0, 7) && current_y.between?(0, 7)
   end

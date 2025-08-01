@@ -203,24 +203,24 @@ RSpec.describe CheckmateFinder do
     end
   end
 
-  describe '#fixed_search?' do
+  describe '#knight_search?' do
     context 'when the adjacent cell contains knight in knight position' do
       it 'returns true' do
         board = Array.new(8) { Array.new(8, '') }
         board[2][4] = '♞'
         king_position = [1, 2]
         color = :white
-        threat_found = checkmate_finder.fixed_search?(color, board, king_position)
+        threat_found = checkmate_finder.knight_search?(color, board, king_position)
 
         expect(threat_found).to eq(true)
       end
 
       it 'returns false if it finds a pawn in the knight position' do
         board = Array.new(8) { Array.new(8, '') }
-        board[2][4] = '♟'
+        board[3][5] = '♟'
         king_position = [1, 2]
         color = :white
-        threat_found = checkmate_finder.fixed_search?(color, board, king_position)
+        threat_found = checkmate_finder.knight_search?(color, board, king_position)
 
         expect(threat_found).to eq(false)
       end
@@ -231,21 +231,53 @@ RSpec.describe CheckmateFinder do
         board = Array.new(8) { Array.new(8, '') }
         king_position = [1, 2]
         color = :white
-        threat_found = checkmate_finder.fixed_search?(color, board, king_position)
+        threat_found = checkmate_finder.knight_search?(color, board, king_position)
 
         expect(threat_found).to eq(false)
       end
     end
+  end
 
-    context 'when it spots a spots a pawn in a capture position' do
+  describe '#pawn_search?' do
+    context 'when it spots a pawn in a capture position' do
       it 'returns true' do
         board = Array.new(8) { Array.new(8, '') }
-        king_position = [1, 4]
-        board[2][5] = '♟'
+        king_position = [4, 4]
+        board[3][3] = '♟'
         color = :white
-        threat_found = checkmate_finder.fixed_search?(color, board, king_position)
+        threat_found = checkmate_finder.pawn_search?(color, board, king_position)
 
         expect(threat_found).to eq(true)
+      end
+
+      it 'returns true for black king' do
+        board = Array.new(8) { Array.new(8, '') }
+        king_position = [3, 3]
+        board[4][2] = '♙'
+        color = :black
+        threat_found = checkmate_finder.pawn_search?(color, board, king_position)
+
+        expect(threat_found).to eq(true)
+      end
+    end
+
+    context 'when it does not spot a pawn in a capture position' do
+      it 'returns false' do
+        board = Array.new(8) { Array.new(8, '') }
+        king_position = [1, 4]
+        color = :white
+        threat_found = checkmate_finder.pawn_search?(color, board, king_position)
+
+        expect(threat_found).to eq(false)
+      end
+
+      it 'returns false for black king' do
+        board = Array.new(8) { Array.new(8, '') }
+        king_position = [1, 4]
+        color = :black
+        threat_found = checkmate_finder.pawn_search?(color, board, king_position)
+
+        expect(threat_found).to eq(false)
       end
     end
   end
