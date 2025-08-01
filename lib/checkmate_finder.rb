@@ -1,26 +1,22 @@
 module CheckmateFinder
-  LINEAR_BLACK_PIECE = ['♜', '♛'].freeze # Rook, Queen
-  LINEAR_WHITE_PIECE = ['♖', '♕'].freeze # Rook, Queen
-
-  DIAGONAL_BLACK_PIECE = ['♝', '♛'].freeze # Bishop, Queen
-  DIAGONAL_WHITE_PIECE = ['♗', '♕'].freeze # Bishop, Queen
-
-  FIXED_BLACK_PIECE = ['♞', '♚', '♟'].freeze # Knight, King, Pawn
-  FIXED_WHITE_PIECE = ['♘', '♔', '♙'].freeze # Knight, King, Pawn
-
   ALL_BLACK_PIECES = ['♟', '♜', '♝', '♞', '♛', '♚'].freeze
   ALL_WHITE_PIECES = ['♙', '♖', '♗', '♘', '♕', '♔'].freeze
 
   DIRECTIONAL_PIECES = {
     diagonal: { black: ['♝', '♛'], white: ['♗', '♕'] },
     linear: { black: ['♜', '♛'], white: ['♖', '♕'] },
-    fixed: { black: ['♞', '♟'], white: ['♘', '♙'] }
+    fixed: { black: ['♞'], white: ['♘'] }
   }.freeze
 
-  def checkmate?
-    diagonal_search?
-    linear_search?
-    fixed_search?
+  DIAGONAL_DELTAS = [[-1, -1], [-1, 1], [1, -1], [1, 1]].freeze
+  LINEAR_DELTAS   = [[-1, 0], [1, 0], [0, -1], [0, 1]].freeze
+  KNIGHT_DELTAS   = [[-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                     [1, -2], [1, 2], [2, -1], [2, 1]].freeze
+
+  def check_found?(color, board, king_position)
+    diagonal_search?(color, board, king_position)
+    linear_search?(color, board, king_position)
+    fixed_search?(color, board, king_position)
   end
 
   # search based of a given delta from the POV of King piece. returns true
@@ -31,10 +27,10 @@ module CheckmateFinder
   # board - A 2D array representing the Chessboard
   # start - the coordinates of the king piece
   # delta - the directions in which to search
-  def directional_search?(color, board, start, delta, direction)
+  def directional_search?(color, board, start, deltas, direction)
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
-    delta.any? do |delta|
+    deltas.any? do |delta|
       path_finder(start, delta, board) do |cell|
         next false if ally.include?(cell)
         next false if friendly_enemies.include?(cell)
@@ -43,11 +39,37 @@ module CheckmateFinder
     end
   end
 
-  def diagonal_search?; end
+  def diagonal_search?(color, board, king_position)
+    directional_search?(color, board, king_position, DIAGONAL_DELTAS, :diagonal)
+  end
 
-  def linear_search?; end
+  def linear_search?(color, board, king_position)
+    directional_search?(color, board, king_position, LINEAR_DELTAS, :linear)
+  end
 
-  def fixed_search?; end
+  def fixed_search?(color, board, king_position)
+    knight_found?(color, board, king_position, KNIGHT_DELTAS, :fixed)
+    pawn_found?(color, board, king_position)
+  end
+
+  def pawn_found?(color, board, king_position)
+    
+  end
+
+  def knight_found?(color, board, king_position, deltas, direction)
+    ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
+
+    deltas.any? do |dx, dy|
+      current_x = king_position[0] + dx
+      current_y = king_position[1] + dy
+      next false unless inbound?(current_x, current_y)
+
+      current_position = board[current_x][current_y]
+      next false if ally.include?(current_position)
+      next false if friendly_enemies.include?(current_position)
+      return true if enemy.include?(current_position)
+    end
+  end
 
   # private
 

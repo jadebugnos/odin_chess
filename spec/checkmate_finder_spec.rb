@@ -202,4 +202,51 @@ RSpec.describe CheckmateFinder do
       end
     end
   end
+
+  describe '#fixed_search?' do
+    context 'when the adjacent cell contains knight in knight position' do
+      it 'returns true' do
+        board = Array.new(8) { Array.new(8, '') }
+        board[2][4] = '♞'
+        king_position = [1, 2]
+        color = :white
+        threat_found = checkmate_finder.fixed_search?(color, board, king_position)
+
+        expect(threat_found).to eq(true)
+      end
+
+      it 'returns false if it finds a pawn in the knight position' do
+        board = Array.new(8) { Array.new(8, '') }
+        board[2][4] = '♟'
+        king_position = [1, 2]
+        color = :white
+        threat_found = checkmate_finder.fixed_search?(color, board, king_position)
+
+        expect(threat_found).to eq(false)
+      end
+    end
+
+    context 'when no threat is found in the adjacent cell' do
+      it 'returns false' do
+        board = Array.new(8) { Array.new(8, '') }
+        king_position = [1, 2]
+        color = :white
+        threat_found = checkmate_finder.fixed_search?(color, board, king_position)
+
+        expect(threat_found).to eq(false)
+      end
+    end
+
+    context 'when it spots a spots a pawn in a capture position' do
+      it 'returns true' do
+        board = Array.new(8) { Array.new(8, '') }
+        king_position = [1, 4]
+        board[2][5] = '♟'
+        color = :white
+        threat_found = checkmate_finder.fixed_search?(color, board, king_position)
+
+        expect(threat_found).to eq(true)
+      end
+    end
+  end
 end
