@@ -1,9 +1,9 @@
-require_relative '../lib/checkmate_finder'
+require_relative '../lib/check_finder'
 
-RSpec.describe CheckmateFinder do
-  let(:checkmate_finder) do
+RSpec.describe CheckFinder do
+  let(:check_finder) do
     Class.new do
-      include CheckmateFinder
+      include CheckFinder
     end.new
   end
 
@@ -24,7 +24,7 @@ RSpec.describe CheckmateFinder do
           [0, 1]    # right
         ]
         direction = :linear
-        threat_found = checkmate_finder.directional_search?(color, board, king_loc, delta, direction)
+        threat_found = check_finder.directional_search?(color, board, king_loc, delta, direction)
 
         expect(threat_found).to eq(true)
       end
@@ -42,7 +42,7 @@ RSpec.describe CheckmateFinder do
           [0, 1]    # right
         ]
         direction = :linear
-        threat_found = checkmate_finder.directional_search?(color, board, king_loc, delta, direction)
+        threat_found = check_finder.directional_search?(color, board, king_loc, delta, direction)
 
         expect(threat_found).to eq(false)
       end
@@ -79,7 +79,7 @@ RSpec.describe CheckmateFinder do
             [1, -1],  [1, 1]
           ]
           direction = :diagonal
-          threat_found = checkmate_finder.directional_search?(color, chess_board, king_loc, delta, direction)
+          threat_found = check_finder.directional_search?(color, chess_board, king_loc, delta, direction)
 
           expect(threat_found).to eq(false)
         end
@@ -117,7 +117,7 @@ RSpec.describe CheckmateFinder do
             [1, -1],  [1, 1]
           ]
           direction = :diagonal
-          threat_found = checkmate_finder.directional_search?(color, chess_board, king_loc, delta, direction)
+          threat_found = check_finder.directional_search?(color, chess_board, king_loc, delta, direction)
 
           expect(threat_found).to eq(false)
         end
@@ -136,7 +136,7 @@ RSpec.describe CheckmateFinder do
           [1, -1],  [1, 1]
         ]
         direction = :diagonal
-        diagonal_threat_found = checkmate_finder.directional_search?(color, board, king_loc, delta, direction)
+        diagonal_threat_found = check_finder.directional_search?(color, board, king_loc, delta, direction)
 
         expect(diagonal_threat_found).to eq(true)
       end
@@ -150,7 +150,7 @@ RSpec.describe CheckmateFinder do
           [1, -1],  [1, 1]
         ]
         direction = :diagonal
-        diagonal_threat_found = checkmate_finder.directional_search?(color, board, king_coordinates, delta, direction)
+        diagonal_threat_found = check_finder.directional_search?(color, board, king_coordinates, delta, direction)
 
         expect(diagonal_threat_found).to eq(true)
       end
@@ -165,7 +165,7 @@ RSpec.describe CheckmateFinder do
         delta = [[0, 1]] # right only
         direction = :linear
 
-        result = checkmate_finder.directional_search?(color, board, king_loc, delta, direction)
+        result = check_finder.directional_search?(color, board, king_loc, delta, direction)
         expect(result).to eq(true)
       end
     end
@@ -181,7 +181,7 @@ RSpec.describe CheckmateFinder do
         direction = :diagonal
 
         expect(
-          checkmate_finder.directional_search?(color, board, king_loc, delta, direction)
+          check_finder.directional_search?(color, board, king_loc, delta, direction)
         ).to eq(false)
       end
 
@@ -196,7 +196,7 @@ RSpec.describe CheckmateFinder do
           direction = :diagonal
 
           expect(
-            checkmate_finder.directional_search?(color, board, king_loc, delta, direction)
+            check_finder.directional_search?(color, board, king_loc, delta, direction)
           ).to eq(false)
         end
       end
@@ -210,7 +210,7 @@ RSpec.describe CheckmateFinder do
         board[2][4] = '♞'
         king_position = [1, 2]
         color = :white
-        threat_found = checkmate_finder.knight_search?(color, board, king_position)
+        threat_found = check_finder.knight_search?(color, board, king_position)
 
         expect(threat_found).to eq(true)
       end
@@ -220,7 +220,7 @@ RSpec.describe CheckmateFinder do
         board[3][5] = '♟'
         king_position = [1, 2]
         color = :white
-        threat_found = checkmate_finder.knight_search?(color, board, king_position)
+        threat_found = check_finder.knight_search?(color, board, king_position)
 
         expect(threat_found).to eq(false)
       end
@@ -231,7 +231,7 @@ RSpec.describe CheckmateFinder do
         board = Array.new(8) { Array.new(8, '') }
         king_position = [1, 2]
         color = :white
-        threat_found = checkmate_finder.knight_search?(color, board, king_position)
+        threat_found = check_finder.knight_search?(color, board, king_position)
 
         expect(threat_found).to eq(false)
       end
@@ -245,7 +245,7 @@ RSpec.describe CheckmateFinder do
         king_position = [4, 4]
         board[3][3] = '♟'
         color = :white
-        threat_found = checkmate_finder.pawn_search?(color, board, king_position)
+        threat_found = check_finder.pawn_search?(color, board, king_position)
 
         expect(threat_found).to eq(true)
       end
@@ -255,7 +255,7 @@ RSpec.describe CheckmateFinder do
         king_position = [3, 3]
         board[4][2] = '♙'
         color = :black
-        threat_found = checkmate_finder.pawn_search?(color, board, king_position)
+        threat_found = check_finder.pawn_search?(color, board, king_position)
 
         expect(threat_found).to eq(true)
       end
@@ -266,7 +266,7 @@ RSpec.describe CheckmateFinder do
         board = Array.new(8) { Array.new(8, '') }
         king_position = [1, 4]
         color = :white
-        threat_found = checkmate_finder.pawn_search?(color, board, king_position)
+        threat_found = check_finder.pawn_search?(color, board, king_position)
 
         expect(threat_found).to eq(false)
       end
@@ -275,7 +275,7 @@ RSpec.describe CheckmateFinder do
         board = Array.new(8) { Array.new(8, '') }
         king_position = [1, 4]
         color = :black
-        threat_found = checkmate_finder.pawn_search?(color, board, king_position)
+        threat_found = check_finder.pawn_search?(color, board, king_position)
 
         expect(threat_found).to eq(false)
       end

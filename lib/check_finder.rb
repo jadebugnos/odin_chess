@@ -1,6 +1,4 @@
-require 'pry-byebug'
-
-module CheckmateFinder
+module CheckFinder
   ALL_BLACK_PIECES = ['♟', '♜', '♝', '♞', '♛', '♚'].freeze
   ALL_WHITE_PIECES = ['♙', '♖', '♗', '♘', '♕', '♔'].freeze
 
@@ -131,10 +129,6 @@ module CheckmateFinder
   # check if the coordinates is within board bounds
   def inbound?(current_x, current_y)
     current_x.between?(0, 7) && current_y.between?(0, 7)
-  end
-
-  def get_delta(from, to)
-    from <=> to
   end
 end
 
