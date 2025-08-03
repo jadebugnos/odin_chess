@@ -31,28 +31,35 @@ module CheckFinder
     end
   end
 
+  # Checks if the king is in check from diagonal threats (bishops or queens)
   def diagonal_search?(color, board, king_position)
     directional_search?(color, board, king_position, DIAGONAL_DELTAS, :diagonal)
   end
 
+  # Checks if the king is in check from linear threats (rooks or queens).
   def linear_search?(color, board, king_position)
     directional_search?(color, board, king_position, LINEAR_DELTAS, :linear)
   end
 
+  # Checks if the king is in check from a knight.
   def knight_search?(color, board, king_position)
     fixed_search?(color, board, king_position, KNIGHT_DELTAS, :leaper)
   end
 
+  # Checks if the king is in check from an enemy pawn.
   def pawn_search?(color, board, king_position)
     enemy_color = color == :black ? :white : :black
     pawn_deltas = PAWN_DELTAS[enemy_color]
     fixed_search?(color, board, king_position, pawn_deltas, :stepper)
   end
 
+  # Checks if the king is in check from the opposing king (illegal but detected as threat).
   def king_search?(color, board, king_position)
     fixed_search?(color, board, king_position, KING_DELTAS, :royal)
   end
 
+  # Shared logic for fixed-delta piece threats (knights, pawns, kings).
+  # Traverses a fixed set of deltas and returns true if any threatening enemy is found.
   def fixed_search?(color, board, king_pos, deltas, direction)
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
