@@ -281,4 +281,58 @@ RSpec.describe CheckFinder do
       end
     end
   end
+
+  describe 'king_search?' do
+    context 'when it finds a king in an adjacent cell' do
+      it 'returns true' do
+        board = Array.new(8) { Array.new(8, '') }
+        board[5][2] = '♚'
+        king_position = [4, 2]
+        color = :white
+        threat_found = check_finder.king_search?(color, board, king_position)
+
+        expect(threat_found).to eq(true)
+      end
+
+      it 'returns true on other adjacent cell' do
+        board = Array.new(8) { Array.new(8, '') }
+        board[3][1] = '♚'
+        king_position = [4, 2]
+        color = :white
+        threat_found = check_finder.king_search?(color, board, king_position)
+
+        expect(threat_found).to eq(true)
+      end
+
+      it 'returns true on vertical adjacent cell' do
+        board = Array.new(8) { Array.new(8, '') }
+        board[4][3] = '♔'
+        king_position = [4, 2]
+        color = :black
+        threat_found = check_finder.king_search?(color, board, king_position)
+
+        expect(threat_found).to eq(true)
+      end
+    end
+
+    context 'when does does not find a king on an adjacent cell' do
+      it 'returns false' do
+        board = Array.new(8) { Array.new(8, '') }
+        king_position = [4, 2]
+        color = :white
+        threat_found = check_finder.king_search?(color, board, king_position)
+
+        expect(threat_found).to eq(false)
+      end
+
+      it 'works on other position' do
+        board = Array.new(8) { Array.new(8, '') }
+        king_position = [7, 0]
+        color = :black
+        threat_found = check_finder.king_search?(color, board, king_position)
+
+        expect(threat_found).to eq(false)
+      end
+    end
+  end
 end
