@@ -18,9 +18,10 @@ module CheckmateFinder
 
   def adjacent_cell_search?(color, board, king_position)
     king_deltas = CheckConstants::KING_DELTAS
+    enemy_pieces = color == :black ? CheckConstants::ALL_WHITE_PIECES : CheckConstants::ALL_BLACK_PIECES
 
     adjacent_cell_traversal?(king_position, king_deltas) do |x, y|
-      next false unless board[x][y] == ''
+      next false unless board[x][y] == '' || enemy_pieces.include?(board[x][y])
 
       !check_found?(color, board, [x, y])
     end
