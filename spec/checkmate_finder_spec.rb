@@ -23,13 +23,13 @@ RSpec.describe CheckmateFinder do
     end
   end
 
-  describe '#adjacent_cell_search?' do
+  describe '#escape_search?' do
     context 'when a safe adjacent cell is found' do
       it 'returns true' do
         color = :white
         board = Array.new(8) { Array.new(8, '') }
         king_position = [0, 0]
-        safe_cell_found = checkmate_finder.adjacent_cell_search?(color, board, king_position)
+        safe_cell_found = checkmate_finder.escape_search?(color, board, king_position)
 
         expect(safe_cell_found).to eq(true)
       end
@@ -62,7 +62,7 @@ RSpec.describe CheckmateFinder do
           board[4][2] = '♛'
 
           # Now all adjacent squares (3,3), (3,4), (3,5), ..., (5,3) are threatened
-          no_safe_cell = checkmate_finder.adjacent_cell_search?(color, board, king_position)
+          no_safe_cell = checkmate_finder.escape_search?(color, board, king_position)
 
           expect(no_safe_cell).to eq(false)
         end
