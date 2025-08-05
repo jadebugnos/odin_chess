@@ -26,15 +26,20 @@ module CheckFinder
   # deltas - the directions in which to search
   # direction - direction of the piece. eg. :diagonal, :linear etc.
   def directional_search?(*args)
-    color, board, start, deltas, direction = args
+    color, board, start, deltas, direction, threats = args
 
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
     deltas.any? do |delta|
-      straight_path_traversal(start, delta, board) do |cell|
+      straight_path_traversal(start, delta, board) do |cell, x, y|
         next false if ally.include?(cell)
         next false if friendly_enemies.include?(cell)
-        return true if enemy.include?(cell)
+
+        if enemy.include?(cell)
+          # optional collection of threat coordinates and it's direction
+          threats << [[x, y], direction] if threats
+          return true
+        end
       end
     end
   end
@@ -55,7 +60,7 @@ module CheckFinder
   # Checks if the king is in check from a knight.
   # *args in order: color, board, king_position
   def knight_search?(*args)
-    fixed_search?(*args, KNIGHT_DELTAS, :leaper)
+    fixed_search?(*args, KNIGHT_DELTAS, :knight)
   end
 
   # Checks if the king is in check from an enemy pawn.
@@ -65,27 +70,31 @@ module CheckFinder
 
     pawn_deltas = PAWN_DELTAS[enemy_color]
 
-    fixed_search?(*args, pawn_deltas, :stepper)
+    fixed_search?(*args, pawn_deltas, :pawn)
   end
 
   # Checks if the king is in check from the opposing king (illegal but detected as threat).
   # args in order: color, board, king_position
   def king_search?(*args)
-    fixed_search?(*args, KING_DELTAS, :royal)
+    fixed_search?(*args, KING_DELTAS, :king)
   end
 
   # Shared logic for fixed-delta piece threats (knights, pawns, kings).
   # Traverses a fixed set of deltas and returns true if any threatening enemy is found.
   # *args in order: color, board, king_pos, deltas, direction
   def fixed_search?(*args)
-    color, board, king_pos, deltas, direction = args
+    color, board, king_pos, deltas, direction, threats = args
 
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
-    fixed_path_traversal(board, king_pos, deltas) do |cell|
+    fixed_path_traversal(board, king_pos, deltas) do |cell, x, y|
       next false if ally.include?(cell) || friendly_enemies.include?(cell)
 
-      enemy.include?(cell)
+      if enemy.include?(cell)
+        # optional collection of threat coordinates and it's direction
+        threats << [[x, y], direction] if threats
+        return true
+      end
     end
   end
 
@@ -103,7 +112,7 @@ module CheckFinder
 
       current_position = board[current_x][current_y]
 
-      yield(current_position) if block_given?
+      yield(current_position, current_x, current_y) if block_given?
     end
   end
 
@@ -124,6 +133,7 @@ module CheckFinder
   end
 
   # search in a straight line depending on the given direction
+  # *args in order: start, delta, board
   def straight_path_traversal(start, delta, board)
     current_x = start[0] + delta[0]
     current_y = start[1] + delta[1]
@@ -131,7 +141,7 @@ module CheckFinder
     while inbound?(current_x, current_y)
       next_cell = board[current_x][current_y]
 
-      result = yield(next_cell) if block_given?
+      result = yield(next_cell, current_x, current_y) if block_given?
       return result if [true, false].include?(result)
 
       current_x += delta[0]

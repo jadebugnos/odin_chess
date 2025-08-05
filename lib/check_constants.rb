@@ -5,9 +5,9 @@ module CheckConstants
   DIRECTIONAL_PIECES = {
     diagonal: { black: ['♝', '♛'], white: ['♗', '♕'] },
     linear: { black: ['♜', '♛'], white: ['♖', '♕'] },
-    leaper: { black: ['♞'], white: ['♘'] },
-    stepper: { black: ['♟'], white: ['♙'] },
-    royal: { black: ['♚'], white: ['♔'] }
+    knight: { black: ['♞'], white: ['♘'] },
+    pawn: { black: ['♟'], white: ['♙'] },
+    king: { black: ['♚'], white: ['♔'] }
   }.freeze
 
   DIAGONAL_DELTAS = [[-1, -1], [-1, 1], [1, -1], [1, 1]].freeze
