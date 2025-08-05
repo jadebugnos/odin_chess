@@ -6,3 +6,8 @@ Style/FrozenStringLiteralComment:
 
 Style/Documentation:
   Enabled: false
+  
+Metrics/ParameterLists:
+  Max: 6
+Metrics/MethodLength:
+  Max: 12
