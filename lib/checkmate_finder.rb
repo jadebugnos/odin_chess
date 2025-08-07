@@ -1,6 +1,7 @@
 require_relative 'check_finder'
 require_relative 'positions'
 require_relative 'move_validator'
+require 'pry-byebug'
 
 module CheckmateFinder
   include CheckFinder
@@ -57,7 +58,7 @@ module CheckmateFinder
 
       next false unless cell_content == '' || enemy_pieces.include?(cell_content)
 
-      !check_found?(color, board, [x, y])
+      !check_found?(color, board, [x, y], nil)
     end
   end
 
@@ -145,13 +146,13 @@ module CheckmateFinder
   # Iterates through a linear path based on a starting position and delta,
   # yielding each cell coordinate along the way until the target position is reached.
   #
-  # @param pos [Array<Integer>] starting position [x, y]
+  # @param start [Array<Integer>] starting position [x, y]
   # @param delta [Array<Integer>] direction of traversal [dx, dy]
   # @param target [Array<Integer>] final position to stop at [x, y]
   # @yield [x, y] coordinates of each cell visited along the path
-  def check_path_traversal(pos, delta, target)
-    x = pos[0] + delta[0]
-    y = pos[1] + delta[1]
+  def check_path_traversal(start, delta, target)
+    x = start[0] + delta[0]
+    y = start[1] + delta[1]
 
     while inbound?(x, y)
       yield(x, y) if block_given?

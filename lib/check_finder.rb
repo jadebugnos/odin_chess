@@ -23,17 +23,17 @@ module CheckFinder
   # color - the current players color
   # board - A 2D array representing the Chessboard
   # start - the coordinates of the king piece
+  # threats - an empty array used as container to collect threat coordinates
   # deltas - the directions in which to search
   # direction - direction of the piece. eg. :diagonal, :linear etc.
   def directional_search?(*args)
-    color, board, start, deltas, direction, threats = args
+    color, board, start, threats, deltas, direction = args
 
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
     deltas.any? do |delta|
       straight_path_traversal(start, delta, board) do |cell, x, y|
-        next false if ally.include?(cell)
-        next false if friendly_enemies.include?(cell)
+        next false if cell == '' || ally.include?(cell) || friendly_enemies.include?(cell)
 
         if enemy.include?(cell)
           # optional collection of threat coordinates and it's direction
@@ -81,18 +81,20 @@ module CheckFinder
 
   # Shared logic for fixed-delta piece threats (knights, pawns, kings).
   # Traverses a fixed set of deltas and returns true if any threatening enemy is found.
-  # *args in order: color, board, king_pos, deltas, direction
+  # *args in order: color, board, king_pos,threat, deltas, direction
   def fixed_search?(*args)
-    color, board, king_pos, deltas, direction, threats = args
+    color, board, king_pos, threats, deltas, direction = args
 
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
     fixed_path_traversal(board, king_pos, deltas) do |cell, x, y|
+      next false if cell == ''
+
       next false if ally.include?(cell) || friendly_enemies.include?(cell)
 
       if enemy.include?(cell)
         # optional collection of threat coordinates and it's direction
-        threats << [[x, y], direction] if threats
+        threats&.push([x, y], direction)
         return true
       end
     end
@@ -123,6 +125,7 @@ module CheckFinder
   # - enemy pieces that threaten in this direction
   # - enemy pieces that do not threaten in this direction
   def identify_threats_and_allies(color, direction)
+    binding.pry
     enemy_color = color == :black ? :white : :black
 
     allies, all_enemies = color == :black ? [ALL_BLACK_PIECES, ALL_WHITE_PIECES] : [ALL_WHITE_PIECES, ALL_BLACK_PIECES]

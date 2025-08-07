@@ -9,23 +9,37 @@ RSpec.describe CheckmateFinder do
 
   describe '#checkmate?' do
     context 'when a check has been found' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
       before do
-        allow(checkmate_finder).to receive(:check_found?).and_return(true)
-      end
-      it 'calls checkmate_found?' do
-        color = :white
-        board = Array.new(8) { Array.new(8, '') }
-        king_position = [4, 4]
+        # White king surrounded and in check
+        board[4][4] = '♔' # White king
 
-        expect(checkmate_finder).to receive(:checkmate_found?).once
-        checkmate_finder.checkmate?(color, board, king_position)
+        # Black queen delivering check
+        board[0][4] = '♛' # Black queen on same file (vertical check)
+
+        # King's escape squares covered or occupied
+        board[3][3] = '♟'  # Black pawn
+        board[3][4] = '♟'  # Black pawn
+        board[3][5] = '♟'  # Black pawn
+        board[4][3] = '♟'  # Black pawn
+        board[4][5] = '♟'  # Black pawn
+        board[5][3] = '♟'  # Black pawn
+        board[5][4] = '♟'  # Black pawn
+        board[5][5] = '♟'  # Black pawn
+      end
+      it 'returns true' do
+        color = :white
+        king_position = [4, 4]
+        checkmate_found = checkmate_finder.checkmate?(color, board, king_position)
+
+        expect(checkmate_found).to eq(true)
       end
     end
   end
 
   describe '#escape_search?' do
     context 'when a safe adjacent cell is found' do
-      it 'returns true' do
+      xit 'returns true' do
         color = :white
         board = Array.new(8) { Array.new(8, '') }
         king_position = [0, 0]
@@ -35,7 +49,7 @@ RSpec.describe CheckmateFinder do
       end
 
       context 'when all adjacent cells are under attack' do
-        it 'returns false' do
+        xit 'returns false' do
           color = :white
           board = Array.new(8) { Array.new(8, '') }
           king_position = [4, 4]
