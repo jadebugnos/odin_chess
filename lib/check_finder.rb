@@ -1,4 +1,5 @@
 require_relative 'check_constants'
+require 'pry-byebug'
 
 module CheckFinder
   include CheckConstants
@@ -8,12 +9,12 @@ module CheckFinder
   # color - color of the current player
   # board - 2D array that represent the chess board
   # king_position - the position of the king piece
-  def check_found?(*args)
-    diagonal_search?(*args) ||
-      linear_search?(*args) ||
-      knight_search?(*args) ||
-      pawn_search?(*args) ||
-      king_search?(*args)
+  def check_found?(color, board, king_position, threat = nil)
+    diagonal_search?(color, board, king_position, threat) ||
+      linear_search?(color, board, king_position, threat) ||
+      knight_search?(color, board, king_position, threat) ||
+      pawn_search?(color, board, king_position, threat) ||
+      king_search?(color, board, king_position, threat)
   end
 
   # search based of a given delta from the POV of King piece. returns true
@@ -26,19 +27,20 @@ module CheckFinder
   # threats - an empty array used as container to collect threat coordinates
   # deltas - the directions in which to search
   # direction - direction of the piece. eg. :diagonal, :linear etc.
-  def directional_search?(*args)
-    color, board, start, threats, deltas, direction = args
-
+  def directional_search?(color, board, start, deltas, direction, threats = nil)
+    # binding.pry
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
     deltas.any? do |delta|
       straight_path_traversal(start, delta, board) do |cell, x, y|
-        next false if cell == '' || ally.include?(cell) || friendly_enemies.include?(cell)
+        next if cell == ''
+
+        next false if ally.include?(cell) || friendly_enemies.include?(cell)
 
         if enemy.include?(cell)
           # optional collection of threat coordinates and it's direction
           threats << [[x, y], direction] if threats
-          return true
+          break true
         end
       end
     end
@@ -47,44 +49,42 @@ module CheckFinder
   # Checks if the king is in check from diagonal threats (bishops or queens)
   # *args in order:
   # color, board, king_position
-  def diagonal_search?(*args)
-    directional_search?(*args, DIAGONAL_DELTAS, :diagonal)
+  def diagonal_search?(color, board, king_position, threat = nil)
+    directional_search?(color, board, king_position, DIAGONAL_DELTAS, :diagonal, threat)
   end
 
   # Checks if the king is in check from linear threats (rooks or queens).
   # *args in order: color, board, king_position
-  def linear_search?(*args)
-    directional_search?(*args, LINEAR_DELTAS, :linear)
+  def linear_search?(color, board, king_position, threat = nil)
+    directional_search?(color, board, king_position, LINEAR_DELTAS, :linear, threat)
   end
 
   # Checks if the king is in check from a knight.
   # *args in order: color, board, king_position
-  def knight_search?(*args)
-    fixed_search?(*args, KNIGHT_DELTAS, :knight)
+  def knight_search?(color, board, king_position, threat = nil)
+    fixed_search?(color, board, king_position, KNIGHT_DELTAS, :knight, threat)
   end
 
   # Checks if the king is in check from an enemy pawn.
   # *args in order: color, board, king_position
-  def pawn_search?(*args)
-    enemy_color = args[0] == :black ? :white : :black
+  def pawn_search?(color, board, king_position, threat = nil)
+    enemy_color = color == :black ? :white : :black
 
     pawn_deltas = PAWN_DELTAS[enemy_color]
 
-    fixed_search?(*args, pawn_deltas, :pawn)
+    fixed_search?(color, board, king_position, pawn_deltas, :pawn, threat)
   end
 
   # Checks if the king is in check from the opposing king (illegal but detected as threat).
   # args in order: color, board, king_position
-  def king_search?(*args)
-    fixed_search?(*args, KING_DELTAS, :king)
+  def king_search?(color, board, king_position, threat = nil)
+    fixed_search?(color, board, king_position, KING_DELTAS, :king, threat)
   end
 
   # Shared logic for fixed-delta piece threats (knights, pawns, kings).
   # Traverses a fixed set of deltas and returns true if any threatening enemy is found.
   # *args in order: color, board, king_pos,threat, deltas, direction
-  def fixed_search?(*args)
-    color, board, king_pos, threats, deltas, direction = args
-
+  def fixed_search?(color, board, king_pos, deltas, direction, threats = nil)
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
     fixed_path_traversal(board, king_pos, deltas) do |cell, x, y|
@@ -103,9 +103,7 @@ module CheckFinder
   # From the king's point of view, check surrounding squares based on fixed deltas
   # to detect immediate threats (e.g., knights, pawns, king)
   # *args in order: board, king_position, deltas
-  def fixed_path_traversal(*args)
-    board, king_position, deltas = args
-
+  def fixed_path_traversal(board, king_position, deltas)
     deltas.any? do |dx, dy|
       current_x = king_position[0] + dx
       current_y = king_position[1] + dy
@@ -125,7 +123,6 @@ module CheckFinder
   # - enemy pieces that threaten in this direction
   # - enemy pieces that do not threaten in this direction
   def identify_threats_and_allies(color, direction)
-    binding.pry
     enemy_color = color == :black ? :white : :black
 
     allies, all_enemies = color == :black ? [ALL_BLACK_PIECES, ALL_WHITE_PIECES] : [ALL_WHITE_PIECES, ALL_BLACK_PIECES]
