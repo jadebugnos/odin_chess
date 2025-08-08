@@ -28,7 +28,6 @@ module CheckFinder
   # deltas - the directions in which to search
   # direction - direction of the piece. eg. :diagonal, :linear etc.
   def directional_search?(color, board, start, deltas, direction, threats = nil)
-    # binding.pry
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
     deltas.any? do |delta|
@@ -39,7 +38,7 @@ module CheckFinder
 
         if enemy.include?(cell)
           # optional collection of threat coordinates and it's direction
-          threats << [[x, y], direction] if threats
+          threats&.push([x, y], direction)
           break true
         end
       end
