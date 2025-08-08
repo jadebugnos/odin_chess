@@ -91,18 +91,29 @@ module CheckmateFinder
   # @return [Boolean] true if a defense is possible, false otherwise
   def defense_search?(color, board, king_pos, threat_pos)
     pos, dir = threat_pos
+    coordinates = get_coordinates(board, color)
 
-    threat_capturable?(color, board, pos) || threat_blockable?(color, board, king_pos, pos, dir)
+    capturable = threat_capturable?(color, board, pos, coordinates)
+    blockable = threat_blockable?(color, board, king_pos, pos, dir, coordinates)
+
+    capturable || blockable
   end
 
-  # Simulates a "king" check from the threat’s position and the opposing color
-  # to determine if the threat is capturable.
-  # *args order: color, board, position
-  def threat_capturable?(*args)
-    color, board, pos = args
-    enemy_color = color == :black ? :white : :black
+  # Determines if the threatening piece can be captured by any allied piece.
+  #
+  # This method checks if any allied piece can legally move to the position of the threat,
+  # simulating a potential capture. It does not verify whether the move exposes the king to check;
+  # that validation is assumed to be handled in the overall checkmate logic.
+  #
+  # @param color [Symbol] the color of the player's pieces (:white or :black)
+  # @param board [Array<Array>] the current board state
+  # @param pos [Array<Integer>] coordinates of the threatening piece [x, y]
+  # @param coordinates [Array<Array>] positions of all allied pieces [[x1, y1], [x2, y2], ...]
+  # @return [Boolean] true if at least one allied piece can legally capture the threat, false otherwise
+  def threat_capturable?(color, board, pos, coordinates)
+    target_x, target_y = pos
 
-    check_found?(enemy_color, board, pos)
+    simulate_move(target_x, target_y, coordinates, board, color)
   end
 
   # Determines if a threat to the king can be blocked by an allied piece.
@@ -112,11 +123,11 @@ module CheckmateFinder
   # @param king_pos [Array<Integer>] coordinates of the king under threat [x, y]
   # @param pos [Array<Integer>] coordinates of the threatening piece [x, y]
   # @param dir [Symbol] the direction of the threat (:linear or :diagonal)
+  # @param coordinates [Array<Array>] positions of all allied pieces [[x1, y1], [x2, y2], ...]
   # @return [Boolean] true if an allied piece can block the threat, false otherwise
-  def threat_blockable?(color, board, king_pos, pos, dir)
+  def threat_blockable?(color, board, king_pos, pos, dir, coordinates)
     return false unless %i[linear diagonal].include?(dir)
 
-    coordinates = get_coordinates(board, color)
     delta = handle_deltas(pos[0], king_pos[0], pos[1], king_pos[1])
 
     follow_path(board, color, pos, coordinates, delta, king_pos)
@@ -135,12 +146,24 @@ module CheckmateFinder
   # @return [Boolean] true if any allied piece can move into the path, false otherwise
   def follow_path(board, color, pos, coordinates, delta, king_pos)
     check_path_traversal(pos, delta, king_pos) do |target_x, target_y|
-      return true if coordinates.any? do |ally_x, ally_y|
-        move = [[ally_x, ally_y], [target_x, target_y]]
-        check_if_valid_move?(move, board, color)
-      end
+      return true if simulate_move(target_x, target_y, coordinates, board, color)
     end
     false
+  end
+
+  # Simulates if any allied piece can move to a target position and legally capture a threat.
+  #
+  # @param target_x [Integer] the x-coordinate of the square to test
+  # @param target_y [Integer] the y-coordinate of the square to test
+  # @param coordinates [Array<Array>] list of allied piece positions [[x, y], ...]
+  # @param board [Array<Array>] the current 2D board state
+  # @param color [Symbol] the color of the player's pieces
+  # @return [Boolean] true if any piece can legally move to the target square
+  def simulate_move(target_x, target_y, coordinates, board, color)
+    coordinates.any? do |ally_x, ally_y|
+      move = [[ally_x, ally_y], [target_x, target_y]]
+      check_if_valid_move?(move, board, color)
+    end
   end
 
   # Iterates through a linear path based on a starting position and delta,
@@ -155,26 +178,42 @@ module CheckmateFinder
     y = start[1] + delta[1]
 
     while inbound?(x, y)
-      yield(x, y) if block_given?
-
       break if target == [x, y]
+
+      yield(x, y) if block_given?
 
       x += delta[0]
       y += delta[1]
     end
   end
 
-  # Returns an array of coordinates [x, y] for all allied pieces on the board
+  # Returns the coordinates of all allied pieces on the board, excluding the king.
+  #
+  # Iterates through the board and collects the positions of all pieces that belong to the
+  # specified color. The king's position is intentionally excluded since it is handled separately
+  # in check/checkmate logic.
+  #
+  # @param board [Array<Array>] the current 2D board state
+  # @param color [Symbol] the color of the player's pieces (:white or :black)
+  # @return [Array<Array>] a list of coordinates [[x1, y1], [x2, y2], ...] for allied pieces
   def get_coordinates(board, color)
     allied_pieces = Positions::INITIAL_POSITIONS
+    kings = { white: '♔', black: '♚' }
 
     board.each_with_index.flat_map do |row, x|
       row.each_with_index.filter_map do |piece, y|
+        next if kings[color] == piece
+
         [x, y] if allied_pieces[color].key?(piece)
       end
     end
   end
 
+  # Returns an integer delta (-1, 0, or 1) representing the direction of movement.
+  #
+  # @param from [Integer] starting coordinate
+  # @param to [Integer] ending coordinate
+  # @return [Integer] the step direction: -1 (decrease), 1 (increase), or 0 (no movement)
   def get_delta(from, to)
     if from < to
       1
