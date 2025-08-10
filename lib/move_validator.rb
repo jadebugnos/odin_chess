@@ -1,8 +1,11 @@
 require_relative '../lib/positions'
 require_relative '../lib/piece_index'
 require_relative '../lib/validation_messages'
+require_relative '../lib/check_finder'
 
 module MoveValidator
+  include CheckFinder
+
   # this will be a method wrapper for all move validation:
   # checklist of all the validations:
   # [x] Is the input in the correct format?
@@ -14,7 +17,7 @@ module MoveValidator
   # [ ] Does the move avoid putting own king in check?
   # [ ] Are castling/en passant/promotion rules followed if applicable?
 
-  def check_if_valid_move?(input, board, color) # rubocop:disable Metrics/MethodLength
+  def check_if_valid_move?(input, board, color) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
     unless check_input_format?(input)
       ValidationMessages.invalid_format(input)
       return false
@@ -39,6 +42,11 @@ module MoveValidator
       ValidationMessages.invalid_destination(input[1])
       return false
     end
+
+    # unless check_king_safety?(color, board, input, king_pos)
+    #   ValidationMessages.king_is_in_check
+    #   return false
+    # end
 
     true
   end
@@ -101,7 +109,26 @@ module MoveValidator
     false
   end
 
+  def check_king_safety?(color, board, move, king_pos)
+    board_duplicate = deep_copy_board(board)
+    simulate_move(move, board_duplicate)
+
+    !check_found?(color, board_duplicate, king_pos)
+  end
+
   private
+
+  def simulate_move(move, board)
+    (from_x, from_y), (to_x, to_y) = move
+
+    icon = board[from_x][from_y]
+    board[from_x][from_y] = ''
+    board[to_x][to_y] = icon
+  end
+
+  def deep_copy_board(board)
+    board.map { |row| row.map(&:dup) }
+  end
 
   def check_pawn_destination?(move, board, color, pawn)
     PieceIndex::PIECE_HASH[color][pawn].pawn_valid_destination?(move, board, color)
