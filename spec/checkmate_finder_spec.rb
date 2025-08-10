@@ -10,6 +10,8 @@ RSpec.describe CheckmateFinder do
   describe '#checkmate?' do
     context 'when a check has been found' do
       let(:board) { Array.new(8) { Array.new(8, '') } }
+      ignore_puts
+
       before do
         # Black pieces
         board[0][6] = '♚' # Black King at g8
@@ -22,9 +24,86 @@ RSpec.describe CheckmateFinder do
         board[6][1] = '♗'  # White Bishop at b2
         board[7][6] = '♕'  # White Queen at g1
       end
-      xit 'returns true' do
+      it 'returns true' do
         color = :black
         king_position = [0, 6]
+        checkmate_found = checkmate_finder.checkmate?(color, board, king_position)
+
+        expect(checkmate_found).to eq(true)
+      end
+    end
+
+    context 'when the king is in check but can escape' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+      ignore_puts
+
+      before do
+        # Black pieces
+        board[0][6] = '♚' # Black King at g8
+
+        # White pieces
+        board[1][7] = '♕' # White Queen at h7 (delivering check)
+      end
+
+      it 'returns false' do
+        color = :black
+        king_position = [0, 6]
+        checkmate_found = checkmate_finder.checkmate?(color, board, king_position)
+
+        expect(checkmate_found).to eq(false)
+      end
+    end
+
+    context 'when the king is not in check at all' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+      ignore_puts
+
+      before do
+        board[0][4] = '♚' # Black King at e8
+        board[7][4] = '♔' # White King at e1
+      end
+
+      it 'returns false' do
+        color = :black
+        king_position = [0, 4]
+        checkmate_found = checkmate_finder.checkmate?(color, board, king_position)
+
+        expect(checkmate_found).to eq(false)
+      end
+    end
+
+    context 'when the king is in check but a friendly piece can block' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+      ignore_puts
+
+      before do
+        board[0][4] = '♚' # Black King at e8
+        board[7][4] = '♕' # White Queen at e1
+        board[1][4] = '♟' # Black pawn ready to block
+      end
+
+      it 'returns false' do
+        color = :black
+        king_position = [0, 4]
+        checkmate_found = checkmate_finder.checkmate?(color, board, king_position)
+
+        expect(checkmate_found).to eq(false)
+      end
+    end
+
+    context 'when the king is in double check' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+      ignore_puts
+
+      before do
+        board[0][4] = '♚' # Black King at e8
+        board[2][4] = '♕' # White Queen delivering check vertically
+        board[1][3] = '♗' # White Bishop delivering check diagonally
+      end
+
+      xit 'returns true (must move king)' do
+        color = :black
+        king_position = [0, 4]
         checkmate_found = checkmate_finder.checkmate?(color, board, king_position)
 
         expect(checkmate_found).to eq(true)
@@ -34,7 +113,7 @@ RSpec.describe CheckmateFinder do
 
   describe '#escape_search?' do
     context 'when a safe adjacent cell is found' do
-      xit 'returns true' do
+      it 'returns true' do
         color = :white
         board = Array.new(8) { Array.new(8, '') }
         king_position = [0, 0]
@@ -44,7 +123,7 @@ RSpec.describe CheckmateFinder do
       end
 
       context 'when all adjacent cells are under attack' do
-        xit 'returns false' do
+        it 'returns false' do
           color = :white
           board = Array.new(8) { Array.new(8, '') }
           king_position = [4, 4]
@@ -91,14 +170,14 @@ RSpec.describe CheckmateFinder do
     end
 
     context 'when direction is not linear or diagonal' do
-      xit 'returns false' do
+      it 'returns false' do
         result = checkmate_finder.threat_blockable?(color, board, king_pos, pos, :knight, coordinates)
         expect(result).to be false
       end
     end
 
     context 'when direction is linear and threat can be blocked' do
-      xit 'returns true' do
+      it 'returns true' do
         allow(checkmate_finder).to receive(:handle_deltas).and_return([1, 0])
         allow(checkmate_finder).to receive(:follow_path).and_return(true)
 
@@ -108,7 +187,7 @@ RSpec.describe CheckmateFinder do
     end
 
     context 'when direction is diagonal but threat cannot be blocked' do
-      xit 'returns false' do
+      it 'returns false' do
         allow(checkmate_finder).to receive(:handle_deltas).and_return([1, 1])
         allow(checkmate_finder).to receive(:follow_path).and_return(false)
 
