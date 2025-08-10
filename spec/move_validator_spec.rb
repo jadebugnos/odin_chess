@@ -162,7 +162,7 @@ RSpec.describe MoveValidator do
     end
   end
 
-  describe 'check_piece_legal_move?' do
+  describe '#check_piece_legal_move?' do
     context 'when the chosen piece allows the move' do
       let(:board) { Array.new(8) { Array.new(8, '') } }
 
@@ -206,7 +206,7 @@ RSpec.describe MoveValidator do
     end
   end
 
-  describe 'empty_destination?' do
+  describe '#empty_destination?' do
     context 'when the destination cell is empty' do
       let(:board) { Array.new(8) { Array.new(8, '') } }
 
@@ -293,5 +293,86 @@ RSpec.describe MoveValidator do
     #     validator.empty_destination?(player_move, board, color)
     #   end
     # end
+  end
+
+  describe '#check_king_safety?' do
+    context 'when ally king is safe after executing the move' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      before do
+        board[6][3] = '♚' # black king at d2
+        board[5][2] = '♞' # black knight at c3
+        board[2][1] = '♕' # white queen at b6
+      end
+
+      it 'returns true' do
+        color = :black
+        move = [[5, 2], [3, 3]]
+        king_pos = [6, 3]
+        result = validator.check_king_safety?(color, board, move, king_pos)
+
+        expect(result).to be true
+      end
+    end
+
+    context 'when ally king is not safe (in check) after executing the move' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      before do
+        board[6][3] = '♚' # black king at d2
+        board[5][2] = '♞' # black knight at c3
+        board[3][0] = '♕' # white queen at a5
+      end
+
+      it 'returns false' do
+        color = :black
+        move = [[5, 2], [3, 3]]
+        king_pos = [6, 3]
+        result = validator.check_king_safety?(color, board, move, king_pos)
+
+        expect(result).to be false
+      end
+    end
+
+    context 'when the ally king is in double check' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      before do
+        board[6][3] = '♚'
+        board[7][2] = '♞'
+        board[3][0] = '♕'
+        board[0][3] = '♖'
+      end
+
+      it 'return false' do
+        color = :black
+        move = [[7, 2], [5, 3]]
+        king_pos = [6, 3]
+        result = validator.check_king_safety?(color, board, move, king_pos)
+
+        expect(result).to be false
+      end
+    end
+
+    context 'when the piece that is about to move is a pinned piece' do
+      let(:board) { Array.new(8) { Array.new(8, '') } }
+
+      before do
+        board[4][4] = '♚'
+        board[3][4] = '♞'
+        board[3][0] = '♕'
+        board[1][4] = '♖'
+        board[0][4] = '♔'
+      end
+
+      it 'returns false' do
+        color = :black
+        move = [[3, 4], [2, 6]]
+        king_pos = [4, 4]
+        result = validator.check_king_safety?(color, board, move, king_pos)
+
+        expect(result).to be false
+      end
+    end
   end
 end
