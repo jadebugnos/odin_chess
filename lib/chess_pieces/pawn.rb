@@ -24,13 +24,11 @@ class Pawn < ChessPiece
   def pawn_valid_destination?(move, board, color)
     # Determine move and capture patterns based on the pawn's color
     normal, capture = color == :white ? [WHITE_MOVES, WHITE_CAPTURE_DELTAS] : [BLACK_MOVES, BLACK_CAPTURE_DELTAS]
-
     # Destructure the move into starting and ending coordinates
     (from_x, from_y), (to_x, to_y) = move
 
     # Calculate the difference (delta) between from and to coordinates
-    delta = handle_deltas(from_x, to_x, from_y, to_y)
-
+    delta = [to_x - from_x, to_y - from_y]
     # Get the piece (if any) at the destination square
     destination = board[to_x][to_y]
 
