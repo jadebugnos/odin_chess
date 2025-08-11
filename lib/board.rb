@@ -3,11 +3,12 @@ require_relative 'positions'
 
 # this file holds the ChessBoard class which holds all game board logic
 class ChessBoard
-  attr_accessor :board
+  attr_accessor :board, :current_positions
 
   def initialize
     @board = Array.new(8) { Array.new(8, '') }
     @chess_pieces = ChessPiece.new
+    @current_positions = {}
   end
 
   def set_up_pieces
@@ -37,11 +38,44 @@ class ChessBoard
 
   # moves the piece to a target cell
   def move_piece(move, board)
+    update_positions(move, board)
+    puts "@current_positions: #{@current_positions}"
     (from_x, from_y), (to_x, to_y) = move
 
     icon = board[from_x][from_y]
     board[from_x][from_y] = ''
     board[to_x][to_y] = icon
+  end
+
+  def update_positions(move, board)
+    (from_x, from_y), (to_x, to_y) = move
+    icon = board[from_x][from_y]
+    enemy_piece = board[to_x][to_y]
+
+    # delete old position
+    @current_positions[icon].delete([from_x, from_y])
+    # add new position
+    @current_positions[icon] << [to_x, to_y]
+
+    # remove captured piece from cache
+    return unless enemy_piece != '' && @current_positions.key?(enemy_piece)
+
+    @current_positions[enemy_piece].delete([to_x, to_y])
+  end
+
+  def cache_current_positions
+    @current_positions.clear
+    @board.each_with_index.flat_map do |row, x|
+      row.each_with_index.filter_map do |piece, y|
+        next if piece == ''
+
+        if @current_positions.key?(piece)
+          @current_positions[piece] << [x, y]
+        else
+          @current_positions[piece] = [[x, y]]
+        end
+      end
+    end
   end
 
   private

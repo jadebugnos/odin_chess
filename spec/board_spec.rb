@@ -57,6 +57,20 @@ RSpec.describe ChessBoard do
   #   end
   # end
 
-  describe '#update_board' do
+  describe '#cache_current_positions' do
+    subject(:current_board_state) { described_class.new }
+    let(:board) { Array.new(8) { Array.new(8, '') } }
+
+    it 'will cache the current board state to @current_positions' do
+      board[0][0] = "\u2656"
+      board[0][1] = "\u2658"
+      current_board_state.instance_variable_set(:@current_positions, {})
+      current_board_state.instance_variable_set(:@board, board)
+      new_board = { "\u2656" => [[0, 0]], "\u2658" => [[0, 1]] }
+
+      expect { current_board_state.cache_current_positions }.to change {
+        current_board_state.current_positions
+      }.from({}).to(new_board)
+    end
   end
 end
