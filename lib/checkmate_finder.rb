@@ -93,7 +93,7 @@ module CheckmateFinder
     pos, dir = threat_pos
     coordinates = get_coordinates(board, color)
 
-    capturable = threat_capturable?(color, board, pos, coordinates)
+    capturable = threat_capturable?(color, board, pos, coordinates, king_pos)
     blockable = threat_blockable?(color, board, king_pos, pos, dir, coordinates)
 
     capturable || blockable
@@ -110,10 +110,10 @@ module CheckmateFinder
   # @param pos [Array<Integer>] coordinates of the threatening piece [x, y]
   # @param coordinates [Array<Array>] positions of all allied pieces [[x1, y1], [x2, y2], ...]
   # @return [Boolean] true if at least one allied piece can legally capture the threat, false otherwise
-  def threat_capturable?(color, board, pos, coordinates)
+  def threat_capturable?(color, board, pos, coordinates, king_pos)
     target_x, target_y = pos
 
-    simulate_move(target_x, target_y, coordinates, board, color)
+    simulate_move(target_x, target_y, coordinates, board, color, king_pos)
   end
 
   # Determines if a threat to the king can be blocked by an allied piece.
@@ -146,7 +146,7 @@ module CheckmateFinder
   # @return [Boolean] true if any allied piece can move into the path, false otherwise
   def follow_path(board, color, pos, coordinates, delta, king_pos)
     check_path_traversal(pos, delta, king_pos) do |target_x, target_y|
-      return true if simulate_move(target_x, target_y, coordinates, board, color)
+      return true if simulate_move(target_x, target_y, coordinates, board, color, king_pos)
     end
     false
   end
@@ -159,10 +159,10 @@ module CheckmateFinder
   # @param board [Array<Array>] the current 2D board state
   # @param color [Symbol] the color of the player's pieces
   # @return [Boolean] true if any piece can legally move to the target square
-  def simulate_move(target_x, target_y, coordinates, board, color)
+  def simulate_move(target_x, target_y, coordinates, board, color, king_pos = nil)
     coordinates.any? do |ally_x, ally_y|
       move = [[ally_x, ally_y], [target_x, target_y]]
-      check_if_valid_move?(move, board, color)
+      check_if_valid_move?(move, board, color, king_pos)
     end
   end
 
