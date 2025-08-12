@@ -1,10 +1,12 @@
 require_relative 'color_players/black_player'
 require_relative 'color_players/white_player'
 require_relative 'move_validator'
+require_relative 'checkmate_finder'
 
 # this file defines the ChessGame class which holds Game logic
 class ChessGame
   include MoveValidator
+  include CheckmateFinder
 
   def initialize(board)
     @board = board
@@ -22,8 +24,9 @@ class ChessGame
 
   # preparing game requirements before starting
   def prepare_game
-    slow_print(game_intro)
+    # slow_print(game_intro)
     @board.set_up_pieces
+    @board.cache_current_positions
     initialize_players
   end
 
@@ -41,7 +44,16 @@ class ChessGame
       @board.display_board
       handle_moves
       switch_turn
+      break if if_its_checkmate?
     end
+  end
+
+  def if_its_checkmate?
+    color = @current_player.color
+    board = @board.board
+    king_pos = @board.get_king_position(color)
+
+    checkmate?(color, board, king_pos)
   end
 
   # Manages turn order and executes player moves
@@ -57,11 +69,12 @@ class ChessGame
     move = nil
     board = @board.board
     color = @current_player.color
+    king_pos = @board.get_king_position(color)
 
     loop do
       move = @current_player.validate_player_move
 
-      break if check_if_valid_move?(move, board, color)
+      break if check_if_valid_move?(move, board, color, king_pos)
     end
 
     @board.move_piece(move, board)
