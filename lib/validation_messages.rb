@@ -18,4 +18,8 @@ module ValidationMessages
   def self.invalid_destination(cell)
     puts "[Invalid] Destination at #{cell} is not valid"
   end
+
+  def self.king_is_in_check
+    puts '[Invalid] Your king is in danger.'
+  end
 end

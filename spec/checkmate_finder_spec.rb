@@ -90,25 +90,6 @@ RSpec.describe CheckmateFinder do
         expect(checkmate_found).to eq(false)
       end
     end
-
-    context 'when the king is in double check' do
-      let(:board) { Array.new(8) { Array.new(8, '') } }
-      ignore_puts
-
-      before do
-        board[0][4] = '♚' # Black King at e8
-        board[2][4] = '♕' # White Queen delivering check vertically
-        board[1][3] = '♗' # White Bishop delivering check diagonally
-      end
-
-      xit 'returns true (must move king)' do
-        color = :black
-        king_position = [0, 4]
-        checkmate_found = checkmate_finder.checkmate?(color, board, king_position)
-
-        expect(checkmate_found).to eq(true)
-      end
-    end
   end
 
   describe '#escape_search?' do
