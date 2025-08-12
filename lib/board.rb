@@ -39,7 +39,6 @@ class ChessBoard
   # moves the piece to a target cell
   def move_piece(move, board)
     update_positions(move, board)
-    puts "@current_positions: #{@current_positions}"
     (from_x, from_y), (to_x, to_y) = move
 
     icon = board[from_x][from_y]
@@ -76,6 +75,11 @@ class ChessBoard
         end
       end
     end
+  end
+
+  def get_king_position(color)
+    king_icon = color == :white ? '♔' : '♚'
+    @current_positions[king_icon].first
   end
 
   private
