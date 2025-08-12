@@ -17,7 +17,7 @@ module MoveValidator
   # [ ] Does the move avoid putting own king in check?
   # [ ] Are castling/en passant/promotion rules followed if applicable?
 
-  def check_if_valid_move?(input, board, color) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
+  def check_if_valid_move?(input, board, color, king_pos = nil) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
     unless check_input_format?(input)
       ValidationMessages.invalid_format(input)
       return false
@@ -43,10 +43,10 @@ module MoveValidator
       return false
     end
 
-    # unless check_king_safety?(color, board, input, king_pos)
-    #   ValidationMessages.king_is_in_check
-    #   return false
-    # end
+    unless check_king_safety?(color, board, input, king_pos)
+      ValidationMessages.king_is_in_check
+      return false
+    end
 
     true
   end
@@ -111,14 +111,14 @@ module MoveValidator
 
   def check_king_safety?(color, board, move, king_pos)
     board_duplicate = deep_copy_board(board)
-    simulate_move(move, board_duplicate)
+    execute_move(move, board_duplicate)
 
     !check_found?(color, board_duplicate, king_pos)
   end
 
   private
 
-  def simulate_move(move, board)
+  def execute_move(move, board)
     (from_x, from_y), (to_x, to_y) = move
 
     icon = board[from_x][from_y]
