@@ -2,6 +2,7 @@ require_relative 'color_players/black_player'
 require_relative 'color_players/white_player'
 require_relative 'move_validator'
 require_relative 'checkmate_finder'
+require_relative 'game_messages'
 
 # this file defines the ChessGame class which holds Game logic
 class ChessGame
@@ -24,7 +25,7 @@ class ChessGame
 
   # preparing game requirements before starting
   def prepare_game
-    # slow_print(game_intro)
+    slow_print(GameMessages.game_intro)
     @board.set_up_pieces
     @board.cache_current_positions
     initialize_players
@@ -44,16 +45,20 @@ class ChessGame
       @board.display_board
       handle_moves
       switch_turn
-      break if if_its_checkmate?
+      break if its_checkmate?
     end
   end
 
-  def if_its_checkmate?
+  def its_checkmate?
     color = @current_player.color
     board = @board.board
     king_pos = @board.get_king_position(color)
 
-    checkmate?(color, board, king_pos)
+    return false unless checkmate?(color, board, king_pos)
+
+    GameMessages.declare_checkmate
+
+    true
   end
 
   # Manages turn order and executes player moves
@@ -77,7 +82,7 @@ class ChessGame
 
       break if check_if_valid_move?(move, board, color, king_pos, collector)
 
-      ValidationMessages.print_warning(collector)
+      GameMessages.print_warning(collector)
     end
 
     @board.move_piece(move, board)
@@ -98,23 +103,6 @@ class ChessGame
 
   def switch_turn
     @current_player = @current_player == @first_to_move ? @second_to_move : @first_to_move
-  end
-
-  def game_intro
-    <<~INTRO
-      ♔♕♖♗♘♙  Welcome to Ruby Chess  ♟♞♝♜♛♚
-
-      Two armies face off on the 8x8 battlefield.
-      Your goal: Checkmate your opponent’s king.
-
-      Each piece moves in unique patterns — strategy, patience,
-      and foresight will lead you to victory.
-
-      May your moves be bold and your tactics sharp!
-
-      Let the game begin...
-
-    INTRO
   end
 
   def slow_print(text)

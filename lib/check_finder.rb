@@ -1,5 +1,4 @@
 require_relative 'check_constants'
-require 'pry-byebug'
 
 module CheckFinder
   include CheckConstants

@@ -1,7 +1,8 @@
 require_relative 'check_finder'
 require_relative 'positions'
 require_relative 'move_validator'
-require 'pry-byebug'
+require_relative 'game_messages'
+require 'colorize'
 
 module CheckmateFinder
   include CheckFinder
@@ -21,6 +22,8 @@ module CheckmateFinder
     threat_pos = [] # Will store [threat_coordinates, direction] if check is found
 
     return false unless check_found?(color, board, king_pos, threat_pos)
+
+    GameMessages.declare_check
 
     checkmate_found?(color, board, king_pos, threat_pos)
   end

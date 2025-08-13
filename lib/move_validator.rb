@@ -1,6 +1,6 @@
 require_relative '../lib/positions'
 require_relative '../lib/piece_index'
-require_relative '../lib/validation_messages'
+require_relative '../lib/game_messages'
 require_relative '../lib/check_finder'
 
 module MoveValidator
