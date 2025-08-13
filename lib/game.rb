@@ -70,11 +70,14 @@ class ChessGame
     board = @board.board
     color = @current_player.color
     king_pos = @board.get_king_position(color)
+    collector = {}
 
     loop do
       move = @current_player.validate_player_move
 
-      break if check_if_valid_move?(move, board, color, king_pos)
+      break if check_if_valid_move?(move, board, color, king_pos, collector)
+
+      ValidationMessages.print_warning(collector)
     end
 
     @board.move_piece(move, board)

@@ -6,40 +6,6 @@ require_relative '../lib/check_finder'
 module MoveValidator
   include CheckFinder
 
-  # def check_if_valid_move?(input, board, color, king_pos)
-  #   unless check_input_format?(input)
-  #     ValidationMessages.invalid_format(input)
-  #     return false
-  #   end
-
-  #   unless occupied_source_cell?(board, input)
-  #     ValidationMessages.empty_source_cell(input[0])
-  #     return false
-  #   end
-
-  #   unless check_players_turn?(color, input, board)
-  #     ValidationMessages.wrong_turn(input[0], color)
-  #     return false
-  #   end
-
-  #   unless check_piece_legal_move?(color, input, board)
-  #     ValidationMessages.illegal_piece_move(input[0])
-  #     return false
-  #   end
-
-  #   unless empty_destination?(input, board, color)
-  #     ValidationMessages.invalid_destination(input[1])
-  #     return false
-  #   end
-
-  #   unless check_king_safety?(color, board, input, king_pos)
-  #     ValidationMessages.king_is_in_check
-  #     return false
-  #   end
-
-  #   true
-  # end
-
   # this will be a method wrapper for all move validation:
   # checklist of all the validations:
   # [x] Is the input in the correct format?
