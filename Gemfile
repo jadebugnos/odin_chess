@@ -10,4 +10,4 @@ gem 'pry-byebug', '~> 3.11'
 
 gem 'rspec', '~> 3.13'
 
-gem "colorize", "~> 1.1"
+gem 'colorize', '~> 1.1'
