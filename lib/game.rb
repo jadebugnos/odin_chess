@@ -3,6 +3,7 @@ require_relative 'color_players/white_player'
 require_relative 'move_validator'
 require_relative 'checkmate_finder'
 require_relative 'game_messages'
+require_relative 'utility'
 
 # Represents the main Chess game loop and logic.
 #
@@ -11,6 +12,7 @@ require_relative 'game_messages'
 class ChessGame
   include MoveValidator
   include CheckmateFinder
+  include Utility
 
   # @param board [ChessBoard] The board on which the game is played.
   def initialize(board)
@@ -27,8 +29,13 @@ class ChessGame
   # @param state [Symbol, nil] :new to start a fresh game, otherwise resumes.
   # @return [void]
   def play_game(state = nil)
-    prepare_game if state == :new
-    run_game
+    loop do
+      prepare_game(state)
+      run_game
+      break unless play_again?
+
+      state = :restart
+    end
   end
 
   # Prepares the game state before starting.
@@ -36,11 +43,13 @@ class ChessGame
   # Sets up the board, caches positions, and initializes players.
   #
   # @return [void]
-  def prepare_game
-    slow_print(GameMessages.game_intro)
+  def prepare_game(state)
+    return if state == :load
+
+    slow_print(GameMessages.game_intro) unless state == :restart
     @board.set_up_pieces
     @board.cache_current_positions
-    initialize_players
+    initialize_players unless same_players?(state)
   end
 
   # Initializes both players and assigns their names and colors.
@@ -135,15 +144,15 @@ class ChessGame
     @current_player = @current_player == @first_to_move ? @second_to_move : @first_to_move
   end
 
-  # Prints text with a typing animation effect.
-  #
-  # @param text [String] The text to print.
-  # @return [void]
-  def slow_print(text)
-    text.each_char do |char|
-      print char
-      sleep(0.01)
-    end
-    puts
+  def play_again?
+    puts 'Do you want to play again?(y/n)'
+    handle_validation == 'y'
+  end
+
+  def same_players?(state)
+    return false if state == :new
+
+    puts 'Same_players?(y/n)'
+    handle_validation == 'y'
   end
 end
