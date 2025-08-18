@@ -1,32 +1,15 @@
 require 'yaml'
+require_relative 'utility'
 
 # Provides functionality for saving and loading game state.
 #
 # Includes methods for file persistence, serialization, and user input
 # validation when saving or loading games.
 module Serializable
+  include Utility
+
   # Directory where game save files are stored.
   SAVE_DIR = File.expand_path('../saves', __dir__).freeze
-
-  # Validates user input to ensure only 'y' or 'n' responses are accepted.
-  #
-  # Keeps prompting until a valid response is given.
-  #
-  # @return [String] 'y' or 'n'.
-  def handle_validation
-    answer = ''
-
-    until %w[y n].include?(answer)
-      begin
-        answer = gets.chomp.downcase
-        raise 'Invalid input! enter y or n' unless %w[y n].include?(answer)
-      rescue StandardError => e
-        puts e.message
-      end
-    end
-
-    answer
-  end
 
   # Saves the given game state to a YAML file.
   #
