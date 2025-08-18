@@ -1,9 +1,11 @@
 require_relative '../lib/input_helper'
+require_relative '../lib/serializable'
 
 class Player # rubocop:disable Metrics/ClassLength
   attr_accessor :name, :color
 
   include InputHelper
+  include Serializable
 
   def initialize(name = nil, color = nil)
     @name = name
@@ -11,11 +13,16 @@ class Player # rubocop:disable Metrics/ClassLength
   end
 
   # Main method to validate a player's move (expects 2 valid inputs)
-  def validate_player_move
+  def validate_player_move(game_state = nil)
     move = []
     loop do
       print_move_stage(move.length) # Prompt based on input stage
       input = gets.chomp.strip.downcase
+
+      if %w[save exit].include?(input)
+        handle_save_exit(game_state, input)
+        next
+      end
 
       move << input if check_input?(input) # Only accept valid inputs
       break if move.length == 2 # Expecting 2 steps: from → to
@@ -24,10 +31,25 @@ class Player # rubocop:disable Metrics/ClassLength
     convert_input(move)
   end
 
+  def handle_save_exit(game_state, input)
+    save_game_state(game_state) if input == 'save'
+    handle_resignation(game_state) if input == 'exit'
+  end
+
+  def handle_resignation(_game_state = nil)
+    # color = game_state.current_player.color == :white ? 'Black Player' : 'White Player'
+
+    puts 'Are you sure you want to quit?(y/n)'
+
+    return unless handle_validation == 'y'
+
+    exit(0)
+  end
+
   # validates player input
   def check_input?(input)
     unless input.length == 2
-      puts 'only accepts 1 number between 1-8 and a letter a-h'
+      puts '[Invalid] only accepts 1 number between 1-8 and a letter a-h'
       return false
     end
 
@@ -118,12 +140,13 @@ class Player # rubocop:disable Metrics/ClassLength
   end
 
   # Show different messages depending on input stage
-  def print_move_stage(move)
+  def print_move_stage(move_count)
+    puts "\n[Commands: type 'save' to save, 'exit' to quit]\n"
     puts "#{@name}'s turn. your color is #{@color}."
-    if move.zero?
-      puts 'Select a piece to move: '
+    if move_count.zero?
+      puts "Select a piece to move (e.g., 'a2'), then press Enter:"
     else
-      puts 'select a cell to move: '
+      puts "Enter the destination square (e.g., 'a4'), then press Enter:"
     end
   end
 
