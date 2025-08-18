@@ -18,7 +18,18 @@ module Serializable
     answer
   end
 
-  def save_game(state, filename)
+  def save_game_state(state)
+    puts 'Enter file name: '
+    filename = gets.chomp.strip
+
+    concatenated = filename.end_with?('.yml') ? filename : "#{filename}.yml"
+
+    puts "Are you sure with #{filename}?(y/n)"
+
+    save_file(state, concatenated) if handle_validation == 'y'
+  end
+
+  def save_file(state, filename)
     filepath = File.join(Serializable::SAVE_DIR, filename)
     str_obj = YAML.dump(state)
     File.write(filepath, str_obj)
@@ -29,7 +40,7 @@ module Serializable
 
     return if files.empty?
 
-    puts 'Do you want to load a saved game?'
+    puts 'Do you want to load a saved game?(y/n)'
 
     return load_game if handle_validation == 'y'
 
@@ -60,33 +71,17 @@ module Serializable
 
       return filepath if File.exist?(filepath)
 
-      puts "file name doesn't exist!"
+      puts 'file name not found.'
     end
   end
 
   def load_file(filepath)
-    if File.exist?(filepath)
-      permitted = [ChessGame, ChessBoard, ChessPiece] + ObjectSpace.each_object(Class).select { |c| c < ChessPiece }
+    return unless File.exist?(filepath)
 
-      YAML.safe_load_file(filepath, permitted_classes: permitted)
-    else
-      self
-    end
+    permitted = [
+      ChessGame, ChessBoard, ChessPiece, Player, Symbol
+    ] + ObjectSpace.each_object(Class).select { |c| c < ChessPiece }
+
+    YAML.load_file(filepath, permitted_classes: permitted, aliases: true)
   end
 end
-
-# require_relative 'board'
-# require_relative 'game'
-
-# dummy_game = Class.new do
-#   include Serializable
-# end.new
-
-# board = ChessBoard.new
-# game = ChessGame.new(board)
-# filename = 'jade.yml'
-# dummy_game.save_game(game, filename)
-
-# loaded = dummy_game.handle_load_game
-
-# (loaded || game).play_game
