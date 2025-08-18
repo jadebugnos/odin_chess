@@ -8,17 +8,17 @@ Build a complete chess game that runs in the command line and shows what I've le
 
 ### Objectives
 
-- [ ] Two human players can play against each other in the terminal
-- [ ] Prevent players from making illegal moves
-- [ ] Detect and declare **check** and **checkmate**
-- [ ] Allow saving and loading the game (serialization)
-- [ ] Write Rspec tests for important parts of the program
-- [ ] keep code modular with clean class and method design
+- [x] Two human players can play against each other in the terminal
+- [x] Prevent players from making illegal moves
+- [x] Detect and declare **check** and **checkmate**
+- [x] Allow saving and loading the game (serialization)
+- [x] Write Rspec tests for important parts of the program
+- [x] keep code modular with clean class and method design
 
 ### Extra Features (Stretch Goals)
 
 - [ ] Add a basic AI opponent
-- [ ] Use Unicode chess characters to display the board
+- [x] Use Unicode chess characters to display the board
 
 ## Tech Stack
 
