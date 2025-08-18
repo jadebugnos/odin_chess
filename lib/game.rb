@@ -18,8 +18,8 @@ class ChessGame
     @current_player = nil
   end
 
-  def play_game
-    prepare_game
+  def play_game(state = nil)
+    prepare_game if state == :new
     run_game
   end
 
@@ -78,7 +78,7 @@ class ChessGame
     collector = {}
 
     loop do
-      move = @current_player.validate_player_move
+      move = @current_player.validate_player_move(self)
 
       break if check_if_valid_move?(move, board, color, king_pos, collector)
 
@@ -108,7 +108,7 @@ class ChessGame
   def slow_print(text)
     text.each_char do |char|
       print char
-      sleep(0.03)
+      sleep(0.01)
     end
     puts
   end
