@@ -6,16 +6,20 @@ require_relative '../lib/check_finder'
 module MoveValidator
   include CheckFinder
 
-  # this will be a method wrapper for all move validation:
-  # checklist of all the validations:
-  # [x] Is the input in the correct format?
-  # [x] Does the source square have a piece?
-  # [x] Is it that player's turn?
-  # [x] Is the move allowed by the piece type?
-  # [x] Is the path clear (for sliding pieces)?
-  # [x] Is the destination valid (empty or enemy)?
-  # [x] Does the move avoid putting own king in check?
-  # [ ] Are castling/en passant/promotion rules followed if applicable?
+  # Validates whether a player's move is legal based on a checklist:
+  # - Input format is valid
+  # - Source cell contains a piece
+  # - The piece belongs to the current player
+  # - Move is legal for that piece
+  # - Destination is valid (empty or enemy)
+  # - Move does not leave own king in check
+  #
+  # @param input [Array<Array>] move coordinates [[from_x, from_y], [to_x, to_y]]
+  # @param board [Array<Array>] 2D array representing the board
+  # @param color [Symbol] the current player's color (:white or :black)
+  # @param king_pos [Array<Integer>] current king's position [x, y]
+  # @param collector [Hash, nil] optional tracker storing which rule failed
+  # @return [Boolean] true if the move is valid, false otherwise
   def check_if_valid_move?(input, board, color, king_pos, collector = nil)
     check_input_format?(input, collector) &&
       occupied_source_cell?(board, input, collector) &&
@@ -25,9 +29,11 @@ module MoveValidator
       check_king_safety?(color, board, input, king_pos, collector)
   end
 
-  # checks if the input is in the correct format
-  # @param input [Array<Array>] a 2D array of origin and target coordinates [[fx, fy], [tx, ty]]
-  # @param collector [Hash] optional storage for result for later use
+  # Checks if the input move is within valid board coordinates.
+  #
+  # @param input [Array<Array>] move coordinates [[from_x, from_y], [to_x, to_y]]
+  # @param collector [Hash, nil] tracker to record failure if invalid
+  # @return [Boolean] true if format is valid, false otherwise
   def check_input_format?(input, collector = nil)
     return false if input.include?(nil)
 
@@ -38,8 +44,12 @@ module MoveValidator
     result
   end
 
-  # check the source cell since input is [[x, y] [x, y]] and the first
-  # element is the source cell. will return false if cell is empty otherwise return true
+  # Checks if the source cell contains a piece.
+  #
+  # @param board [Array<Array>] 2D board array
+  # @param input [Array<Array>] move coordinates
+  # @param collector [Hash, nil] tracker to record failure if empty
+  # @return [Boolean] true if source cell has a piece, false otherwise
   def occupied_source_cell?(board, input, collector = nil)
     x, y = input[0]
 
@@ -50,7 +60,13 @@ module MoveValidator
     result
   end
 
-  # Checks if the piece being moved belongs to the current player
+  # Checks if the selected piece belongs to the current player.
+  #
+  # @param turn [Symbol] current player's color (:white or :black)
+  # @param input [Array<Array>] move coordinates
+  # @param board [Array<Array>] 2D board array
+  # @param collector [Hash, nil] tracker to record failure if wrong player
+  # @return [Boolean] true if piece matches player's turn, false otherwise
   def check_players_turn?(turn, input, board, collector = nil)
     x, y = input[0]
     icon = board[x][y]
@@ -62,7 +78,13 @@ module MoveValidator
     result
   end
 
-  # Delegates move validation to the piece's `legal_move?` method
+  # Validates that the piece's movement follows its rules.
+  #
+  # @param color [Symbol] current player's color
+  # @param player_move [Array<Array>] move coordinates
+  # @param board [Array<Array>] 2D board array
+  # @param collector [Hash, nil] tracker to record failure if illegal move
+  # @return [Boolean] true if move is legal for that piece, false otherwise
   def check_piece_legal_move?(color, player_move, board, collector = nil)
     x, y = player_move[0]
     icon = board[x][y]
@@ -74,8 +96,15 @@ module MoveValidator
     result
   end
 
-  # remind me: TDD this method next to add functionality
-  # then add logic to #update_board in the Board class
+  # Validates the destination square of a move:
+  # - Pawn: checks with pawn-specific rules
+  # - Others: ensures square is empty or occupied by an enemy
+  #
+  # @param move [Array<Array>] move coordinates
+  # @param board [Array<Array>] 2D board array
+  # @param color [Symbol] current player's color
+  # @param collector [Hash, nil] tracker to record failure if invalid
+  # @return [Boolean] true if destination is valid, false otherwise
   def empty_destination?(move, board, color, collector = nil)
     (from_x, from_y), (to_x, to_y) = move
     piece = board[to_x][to_y]
@@ -92,6 +121,14 @@ module MoveValidator
     result
   end
 
+  # Checks if the move would put or leave the king in check.
+  #
+  # @param color [Symbol] current player's color
+  # @param board [Array<Array>] 2D board array
+  # @param move [Array<Array>] move coordinates
+  # @param king_pos [Array<Integer>] current king's position
+  # @param collector [Hash, nil] tracker to record failure if unsafe
+  # @return [Boolean] true if king is safe after move, false otherwise
   def check_king_safety?(color, board, move, king_pos, collector = nil)
     board_duplicate = deep_copy_board(board)
     execute_move(move, board_duplicate)
@@ -105,7 +142,11 @@ module MoveValidator
 
   private
 
-  # this method handles the destination validation for all pieces except the pawn
+  # Validates destination for non-pawn pieces.
+  #
+  # @param piece [String] the piece at the target cell
+  # @param color [Symbol] current player's color
+  # @return [Boolean] true if target is empty or enemy, false otherwise
   def generic_valid_destination?(piece, color)
     ally, enemy = color == :black ? %i[black white] : %i[white black]
 
@@ -118,6 +159,11 @@ module MoveValidator
     false
   end
 
+  # Executes a move on a duplicate board (used for safety checks).
+  #
+  # @param move [Array<Array>] move coordinates
+  # @param board [Array<Array>] 2D board array
+  # @return [void]
   def execute_move(move, board)
     (from_x, from_y), (to_x, to_y) = move
 
@@ -126,14 +172,29 @@ module MoveValidator
     board[to_x][to_y] = icon
   end
 
+  # Creates a deep copy of the board to test hypothetical moves safely.
+  #
+  # @param board [Array<Array>] 2D board array
+  # @return [Array<Array>] duplicated board
   def deep_copy_board(board)
     board.map { |row| row.map(&:dup) }
   end
 
+  # Validates pawn-specific move destinations.
+  #
+  # @param move [Array<Array>] move coordinates
+  # @param board [Array<Array>] 2D board array
+  # @param color [Symbol] current player's color
+  # @param pawn [String] pawn character
+  # @return [Boolean] true if pawn destination is valid, false otherwise
   def check_pawn_destination?(move, board, color, pawn)
     PieceIndex::PIECE_HASH[color][pawn].pawn_valid_destination?(move, board, color)
   end
 
+  # Checks if the piece is a pawn (white or black).
+  #
+  # @param piece [String] Unicode character of the piece
+  # @return [Boolean] true if piece is a pawn, false otherwise
   def piece_is_pawn?(piece)
     ["\u2659", "\u265F"].include?(piece)
   end

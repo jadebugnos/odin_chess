@@ -1,41 +1,53 @@
-# this file defines the Pieces class which holds the chess pieces logic
+# Represents a chess piece and its movement logic.
+#
+# This class encapsulates the rules for determining whether a given move
+# is valid for a piece, depending on whether it moves in fixed deltas
+# (e.g., knights, kings) or along directions (e.g., rooks, bishops, queens).
 class ChessPiece
+  # Pieces that move with fixed deltas rather than sliding directions.
   FIXED_DELTA_PIECES = ['♘', '♞', '♔', '♚'].freeze
 
+  # Initializes a chess piece.
+  #
+  # @param uni [String, nil] Unicode representation of the piece.
+  # @param lgm [Array<Array<Integer>>, nil] List of allowed fixed deltas (for knights, kings, pawns).
+  # @param lgd [Array<Array<Integer>>, nil] List of allowed directions (for rooks, bishops, queens).
   def initialize(uni = nil, lgm = nil, lgd = nil)
     @unicode = uni
     @legal_moves = lgm
     @legal_directions = lgd
   end
 
-  # Checks whether a move is valid based on the piece's movement rules.
-  # For fixed-delta pieces (like knights), uses pattern-matching.
-  # For directional pieces (like rooks or bishops), checks direction and path clearance.
+  # Determines whether a move is legal for this piece.
+  #
+  # For fixed-delta pieces (e.g., knights, kings), validates against move patterns.
+  # For sliding pieces (e.g., rooks, bishops, queens), checks both direction and path clearance.
+  #
+  # @param move [Array<Array<Integer>>] From and to coordinates: [[from_x, from_y], [to_x, to_y]].
+  # @param board [Array<Array<String>>] The current chessboard state.
+  # @return [Boolean] true if the move is legal, false otherwise.
   def legal_move?(move, board, *_args)
     (from_x, from_y), (to_x, to_y) = move
 
-    # Use pattern-matching logic for fixed-move pieces (e.g., knight)
     return matches_pattern?(move) if FIXED_DELTA_PIECES.include?(board[from_x][from_y])
 
-    # Calculate the direction of the move
     delta = handle_deltas(from_x, to_x, from_y, to_y)
 
-    # Reject move if it's not in the piece's allowed directions
     return false unless @legal_directions.include?(delta)
 
     start = move[0]
     destination = move[1]
 
-    # Check if the path from start to destination is clear
     valid_path?(start, destination, delta, board)
   end
 
   private
 
-  # Returns the step direction between two values:
-  # - 1 if moving forward
-  # - -1 if moving backward
-  # - 0 if no movement
+  # Computes the delta (step direction) between two coordinates.
+  #
+  # @param from [Integer] Starting coordinate.
+  # @param to [Integer] Target coordinate.
+  # @return [Integer] -1 if decreasing, 1 if increasing, 0 if unchanged.
   def get_delta(from, to)
     if from < to
       1
@@ -46,30 +58,35 @@ class ChessPiece
     end
   end
 
-  # Helper method used by #legal_move?
-  # Returns the directional delta (as [dx, dy]) between two coordinates
+  # Computes the directional delta vector between two coordinates.
+  #
+  # @param from_x [Integer] Starting row.
+  # @param to_x [Integer] Target row.
+  # @param from_y [Integer] Starting column.
+  # @param to_y [Integer] Target column.
+  # @return [Array<Integer>] Delta as [dx, dy].
   def handle_deltas(from_x, to_x, from_y, to_y)
     delta_x = get_delta(from_x, to_x)
     delta_y = get_delta(from_y, to_y)
     [delta_x, delta_y]
   end
 
-  # Helper method used by #legal_move? to check if the path is clear.
-  # Returns true if the path to the destination is not blocked; false otherwise.
+  # Checks if the path between two squares is clear in a given direction.
+  #
+  # @param start [Array<Integer>] Starting coordinates [row, col].
+  # @param destination [Array<Integer>] Target coordinates [row, col].
+  # @param direction [Array<Integer>] Movement step [dx, dy].
+  # @param board [Array<Array<String>>] Current chessboard state.
+  # @return [Boolean] true if no blocking pieces are encountered, false otherwise.
   def valid_path?(start, destination, direction, board)
-    # Start at the next square in the given direction
     current_x = start[0] + direction[0]
     current_y = start[1] + direction[1]
 
-    # Keep moving in the direction until we go out of bounds
     while current_x.between?(0, 7) && current_y.between?(0, 7)
-      # If we reach the destination square, the path is clear
       return true if destination == [current_x, current_y]
 
-      # If a square is occupied before reaching destination, path is blocked
       return false unless board[current_x][current_y] == ''
 
-      # Move to the next square in the same direction
       current_x += direction[0]
       current_y += direction[1]
     end
@@ -77,11 +94,14 @@ class ChessPiece
     false
   end
 
+  # Determines if a move matches the piece's allowed fixed-move patterns.
+  #
+  # @param move [Array<Array<Integer>>] From and to coordinates.
+  # @return [Boolean] true if the move is valid according to fixed deltas.
   def matches_pattern?(move)
     from = move[0]
     to = move[1]
 
-    # Calculate delta (to - from)
     delta_move = [to[0] - from[0], to[1] - from[1]]
 
     @legal_moves.include?(delta_move)

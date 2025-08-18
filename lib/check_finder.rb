@@ -3,11 +3,13 @@ require_relative 'check_constants'
 module CheckFinder
   include CheckConstants
 
-  # this method returns true if a check is found otherwise false.
-  # arguments in order:
-  # color - color of the current player
-  # board - 2D array that represent the chess board
-  # king_position - the position of the king piece
+  # Determines if the king is currently in check.
+  #
+  # @param color [Symbol] The color of the current player (:white or :black).
+  # @param board [Array<Array<String>>] 2D array representing the chessboard.
+  # @param king_position [Array<Integer>] Coordinates of the king piece [row, col].
+  # @param threat [Array] (optional) Container to collect threat coordinates.
+  # @return [Boolean] true if the king is in check, false otherwise.
   def check_found?(color, board, king_position, threat = nil)
     diagonal_search?(color, board, king_position, threat) ||
       linear_search?(color, board, king_position, threat) ||
@@ -16,16 +18,15 @@ module CheckFinder
       king_search?(color, board, king_position, threat)
   end
 
-  # search based of a given delta from the POV of King piece. returns true
-  # if the cell contains an enemy piece that captures with the same direction
-  # otherwise returns false
-  # *args in order:
-  # color - the current players color
-  # board - A 2D array representing the Chessboard
-  # start - the coordinates of the king piece
-  # threats - an empty array used as container to collect threat coordinates
-  # deltas - the directions in which to search
-  # direction - direction of the piece. eg. :diagonal, :linear etc.
+  # Searches along directional deltas from the king's position to detect threats.
+  #
+  # @param color [Symbol] Current player's color.
+  # @param board [Array<Array<String>>] 2D chessboard array.
+  # @param start [Array<Integer>] Starting coordinates (king position).
+  # @param deltas [Array<Array<Integer>>] Movement offsets for the search.
+  # @param direction [Symbol] Type of direction (:diagonal, :linear, etc.).
+  # @param threats [Array] (optional) Container to collect threat coordinates.
+  # @return [Boolean] true if a threatening enemy is found, false otherwise.
   def directional_search?(color, board, start, deltas, direction, threats = nil)
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
@@ -44,27 +45,46 @@ module CheckFinder
     end
   end
 
-  # Checks if the king is in check from diagonal threats (bishops or queens)
-  # *args in order:
-  # color, board, king_position
+  # Checks for threats from bishops or queens (diagonal movement).
+  #
+  # @param color [Symbol]
+  # @param board [Array<Array<String>>]
+  # @param king_position [Array<Integer>]
+  # @param threat [Array] (optional)
+  # @return [Boolean]
   def diagonal_search?(color, board, king_position, threat = nil)
     directional_search?(color, board, king_position, DIAGONAL_DELTAS, :diagonal, threat)
   end
 
-  # Checks if the king is in check from linear threats (rooks or queens).
-  # *args in order: color, board, king_position
+  # Checks for threats from rooks or queens (linear movement).
+  #
+  # @param color [Symbol]
+  # @param board [Array<Array<String>>]
+  # @param king_position [Array<Integer>]
+  # @param threat [Array] (optional)
+  # @return [Boolean]
   def linear_search?(color, board, king_position, threat = nil)
     directional_search?(color, board, king_position, LINEAR_DELTAS, :linear, threat)
   end
 
-  # Checks if the king is in check from a knight.
-  # *args in order: color, board, king_position
+  # Checks for threats from knights.
+  #
+  # @param color [Symbol]
+  # @param board [Array<Array<String>>]
+  # @param king_position [Array<Integer>]
+  # @param threat [Array] (optional)
+  # @return [Boolean]
   def knight_search?(color, board, king_position, threat = nil)
     fixed_search?(color, board, king_position, KNIGHT_DELTAS, :knight, threat)
   end
 
-  # Checks if the king is in check from an enemy pawn.
-  # *args in order: color, board, king_position
+  # Checks for threats from enemy pawns.
+  #
+  # @param color [Symbol]
+  # @param board [Array<Array<String>>]
+  # @param king_position [Array<Integer>]
+  # @param threat [Array] (optional)
+  # @return [Boolean]
   def pawn_search?(color, board, king_position, threat = nil)
     enemy_color = color == :black ? :white : :black
 
@@ -73,15 +93,27 @@ module CheckFinder
     fixed_search?(color, board, king_position, pawn_deltas, :pawn, threat)
   end
 
-  # Checks if the king is in check from the opposing king (illegal but detected as threat).
-  # args in order: color, board, king_position
+  # Checks for threats from the opposing king.
+  # (Illegal in chess, but still treated as a detectable threat.)
+  #
+  # @param color [Symbol]
+  # @param board [Array<Array<String>>]
+  # @param king_position [Array<Integer>]
+  # @param threat [Array] (optional)
+  # @return [Boolean]
   def king_search?(color, board, king_position, threat = nil)
     fixed_search?(color, board, king_position, KING_DELTAS, :king, threat)
   end
 
-  # Shared logic for fixed-delta piece threats (knights, pawns, kings).
-  # Traverses a fixed set of deltas and returns true if any threatening enemy is found.
-  # *args in order: color, board, king_pos,threat, deltas, direction
+  # Shared logic for detecting threats from fixed-delta pieces (knight, pawn, king).
+  #
+  # @param color [Symbol]
+  # @param board [Array<Array<String>>]
+  # @param king_pos [Array<Integer>]
+  # @param deltas [Array<Array<Integer>>] Movement offsets to check.
+  # @param direction [Symbol] Piece type (:knight, :pawn, :king).
+  # @param threats [Array] (optional)
+  # @return [Boolean]
   def fixed_search?(color, board, king_pos, deltas, direction, threats = nil)
     ally, enemy, friendly_enemies = identify_threats_and_allies(color, direction)
 
@@ -98,9 +130,16 @@ module CheckFinder
     end
   end
 
-  # From the king's point of view, check surrounding squares based on fixed deltas
-  # to detect immediate threats (e.g., knights, pawns, king)
-  # *args in order: board, king_position, deltas
+  # Traverses a set of fixed deltas around the king’s position.
+  #
+  # @param board [Array<Array<String>>]
+  # @param king_position [Array<Integer>]
+  # @param deltas [Array<Array<Integer>>]
+  # @yield [cell, x, y] Executes a block for each checked square.
+  # @yieldparam cell [String] The piece or empty string at the position.
+  # @yieldparam x [Integer] Row coordinate.
+  # @yieldparam y [Integer] Column coordinate.
+  # @return [Boolean] true if a block returns true, false otherwise.
   def fixed_path_traversal(board, king_position, deltas)
     deltas.any? do |dx, dy|
       current_x = king_position[0] + dx
@@ -116,10 +155,12 @@ module CheckFinder
 
   # private
 
-  # Given a color and piece type (direction), returns:
-  # - allied pieces
-  # - enemy pieces that threaten in this direction
-  # - enemy pieces that do not threaten in this direction
+  # Identifies allies, threatening enemies, and non-threatening enemies.
+  #
+  # @param color [Symbol]
+  # @param direction [Symbol]
+  # @return [Array<Array<String>, Array<String>, Array<String>>]
+  #   Returns [allies, threats, friendly_enemies].
   def identify_threats_and_allies(color, direction)
     enemy_color = color == :black ? :white : :black
 
@@ -130,8 +171,16 @@ module CheckFinder
     [allies, threats, friendly_enemies]
   end
 
-  # search in a straight line depending on the given direction
-  # *args in order: start, delta, board
+  # Traverses squares in a straight line until blocked or out of bounds.
+  #
+  # @param start [Array<Integer>] Starting coordinates [row, col].
+  # @param delta [Array<Integer>] Step movement [dx, dy].
+  # @param board [Array<Array<String>>]
+  # @yield [cell, x, y] Executes a block for each square in path.
+  # @yieldparam cell [String] The piece or empty string at the position.
+  # @yieldparam x [Integer]
+  # @yieldparam y [Integer]
+  # @return [Boolean] true if threat found, false otherwise.
   def straight_path_traversal(start, delta, board)
     current_x = start[0] + delta[0]
     current_y = start[1] + delta[1]
@@ -149,13 +198,12 @@ module CheckFinder
     false
   end
 
-  # check if the coordinates is within board bounds
+  # Checks if given coordinates are within chessboard bounds.
+  #
+  # @param current_x [Integer]
+  # @param current_y [Integer]
+  # @return [Boolean] true if coordinates are inside the board, false otherwise.
   def inbound?(current_x, current_y)
     current_x.between?(0, 7) && current_y.between?(0, 7)
   end
 end
-
-# DummyClass = Class.new do
-#   include CheckFinder
-# end
-# dummy = DummyClass.new

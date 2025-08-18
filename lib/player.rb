@@ -1,22 +1,36 @@
 require_relative '../lib/input_helper'
 require_relative '../lib/serializable'
 
+# Represents a chess player with name and color attributes.
+#
+# Handles input validation, assigning player names/colors,
+# and special commands like saving or resigning.
 class Player # rubocop:disable Metrics/ClassLength
   attr_accessor :name, :color
 
   include InputHelper
   include Serializable
 
+  # Initializes a player.
+  #
+  # @param name [String, nil] Player's name.
+  # @param color [Symbol, nil] Player's color (:black or :white).
   def initialize(name = nil, color = nil)
     @name = name
     @color = color
   end
 
-  # Main method to validate a player's move (expects 2 valid inputs)
+  # Validates a player's move by collecting two valid inputs.
+  #
+  # Prompts for the starting square and the destination square,
+  # allowing special commands ('save', 'exit').
+  #
+  # @param game_state [Object, nil] Current game state (for save/exit).
+  # @return [Array<String>] Array of two validated inputs [from, to].
   def validate_player_move(game_state = nil)
     move = []
     loop do
-      print_move_stage(move.length) # Prompt based on input stage
+      print_move_stage(move.length)
       input = gets.chomp.strip.downcase
 
       if %w[save exit].include?(input)
@@ -24,21 +38,26 @@ class Player # rubocop:disable Metrics/ClassLength
         next
       end
 
-      move << input if check_input?(input) # Only accept valid inputs
-      break if move.length == 2 # Expecting 2 steps: from → to
+      move << input if check_input?(input)
+      break if move.length == 2
     end
 
     convert_input(move)
   end
 
+  # Handles save or exit commands.
+  #
+  # @param game_state [Object] Current game state.
+  # @param input [String] Either 'save' or 'exit'.
   def handle_save_exit(game_state, input)
     save_game_state(game_state) if input == 'save'
     handle_resignation(game_state) if input == 'exit'
   end
 
+  # Handles resignation (exit command).
+  #
+  # @param _game_state [Object, nil] Current game state (unused).
   def handle_resignation(_game_state = nil)
-    # color = game_state.current_player.color == :white ? 'Black Player' : 'White Player'
-
     puts 'Are you sure you want to quit?(y/n)'
 
     return unless handle_validation == 'y'
@@ -46,7 +65,10 @@ class Player # rubocop:disable Metrics/ClassLength
     exit(0)
   end
 
-  # validates player input
+  # Checks if input is valid chessboard notation.
+  #
+  # @param input [String] Player's raw input.
+  # @return [Boolean] true if valid, false otherwise.
   def check_input?(input)
     unless input.length == 2
       puts '[Invalid] only accepts 1 number between 1-8 and a letter a-h'
@@ -59,7 +81,11 @@ class Player # rubocop:disable Metrics/ClassLength
     check_letter_and_num?(letter, num)
   end
 
-  # Check if input is within valid board coordinates
+  # Validates that input corresponds to a valid board coordinate.
+  #
+  # @param str [String] File (a–h).
+  # @param num [String] Rank (1–8).
+  # @return [Boolean] true if valid coordinate, false otherwise.
   def check_letter_and_num?(str, num)
     return true if ('1'..'8').include?(num) &&
                    ('a'..'h').include?(str)
@@ -68,48 +94,59 @@ class Player # rubocop:disable Metrics/ClassLength
     false
   end
 
-  # Ask the player to input and confirm their name
+  # Prompts the player to enter and confirm their name.
+  #
+  # @return [void]
   def ask_assign_names
     answer = nil
     name = nil
 
     loop do
       name = prompt_for_name
-
       answer = prompt_to_save_name(name)
-
       break if answer == 'y'
     end
   end
 
-  # Ask the player to choose their color (black or white)
+  # Prompts the player to choose their color (black or white).
+  #
+  # @return [void]
   def ask_assign_colors
     color = nil
     color_is_valid = nil
 
     until color_is_valid
       color, color_is_valid = prompt_for_color
-
       print_color_validity(color_is_valid, color)
     end
 
     @color = color.to_sym
   end
 
-  # Wrapper method that handles both name and color assignment
+  # Handles both name and color assignment.
+  #
+  # @param color [Symbol, nil] Preassigned color (:black or :white).
+  # @return [void]
   def handle_name_and_color(color = nil)
-    print_turn_message(color) # Show message if player 2
-    assign_name               # Ask for and confirm name
-    assign_color(color)       # Assign or ask for color
+    print_turn_message(color)
+    assign_name
+    assign_color(color)
   end
 
   private
 
+  # Prompts for player's name.
+  #
+  # @return [String] The entered name.
   def prompt_for_name
     puts 'what is your name? '
     gets.chomp.strip
   end
 
+  # Confirms with the player whether to save the chosen name.
+  #
+  # @param name [String] Proposed player name.
+  # @return [String] 'y' if confirmed, otherwise 'n'.
   def prompt_to_save_name(name)
     puts "are you sure you want to use #{name}?(y/n)"
 
@@ -126,9 +163,9 @@ class Player # rubocop:disable Metrics/ClassLength
     answer
   end
 
-  # Helper method for ask_assign_colors.
-  # Prompts the user to enter a color and returns an array:
-  # [user's input color, whether the input is valid].
+  # Prompts the player to choose a color.
+  #
+  # @return [Array<(String, Boolean)>] Color input and validity.
   def prompt_for_color
     valid_colors = %w[black white]
 
@@ -139,7 +176,10 @@ class Player # rubocop:disable Metrics/ClassLength
     [color, valid_colors.include?(color)]
   end
 
-  # Show different messages depending on input stage
+  # Prints stage-specific prompts for move input.
+  #
+  # @param move_count [Integer] Current stage (0 for from, 1 for to).
+  # @return [void]
   def print_move_stage(move_count)
     puts "\n[Commands: type 'save' to save, 'exit' to quit]\n"
     puts "#{@name}'s turn. your color is #{@color}."
@@ -150,7 +190,11 @@ class Player # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # helper method for ask_assign_colors to print if the color is valid
+  # Prints whether a chosen color is valid.
+  #
+  # @param color_is_valid [Boolean] Whether the input is valid.
+  # @param color [String] Entered color.
+  # @return [void]
   def print_color_validity(color_is_valid, color)
     if color_is_valid
       puts "your color is #{color}"
@@ -159,17 +203,28 @@ class Player # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # Delegates to ask_assign_names
+  # Delegates to ask_assign_names.
+  #
+  # @return [void]
   def assign_name
     ask_assign_names
   end
 
-  # Print message for player 2
+  # Prints message for player 2 when assigning name/color.
+  #
+  # @param color [Symbol, nil] Preassigned color.
+  # @return [void]
   def print_turn_message(color)
     puts 'Player 2 next. ' unless color.nil?
   end
 
-  # Assigns the opposite color if already chosen, otherwise prompts
+  # Assigns color to player.
+  #
+  # If one color is already chosen, assigns the opposite.
+  # Otherwise prompts for color choice.
+  #
+  # @param color [Symbol, nil] Preassigned color (:black or :white).
+  # @return [void]
   def assign_color(color)
     valid_colors = %i[black white]
     black, white = valid_colors
