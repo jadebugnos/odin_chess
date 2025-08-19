@@ -22,23 +22,45 @@ Build a complete chess game that runs in the command line and shows what I've le
 
 ## How to Run
 
-1. First you need to clone this repo by copying this command
-    ```bash
+1. **Clone this repository**  
+   You can use HTTPS (recommended for most users):  
+   ```bash
+   git clone https://github.com/jadebugnos/odin_chess.git
+   ```
+   or SSH (if you have an SSH key set up):
+   ```bash
    git clone git@github.com:jadebugnos/odin_chess.git
+   ```
 
-2. Install dependencies
-    ```bash
-    bundle install
-3. Make sure to install Ruby
-    ```bash
-    rbenv install
-4. cd into the project directory
-    ```bash
-    cd odin_chess
-5. Run the Game
-    ```bash
-    ruby main.rb
+2. **Navigate into the project directory**
+   ```bash
+   cd odin_chess
+   ```
 
+3. **Install Ruby**  
+   This project requires Ruby 3.3.5.  
+   - If you're using rbenv, simply run:  
+     ```bash
+     rbenv install
+     ```  
+     *(It will read the `.ruby-version` file and install the correct version.)*
+   - If rbenv is not installed, follow the [Official rbenv Installation Guide](https://github.com/rbenv/rbenv#installation) to set it up, then run the command above.  
+   - Otherwise, install Ruby 3.3.5 using your preferred method.
+
+4. **Install dependencies**  
+   - First, ensure you have Bundler installed:
+     ```bash
+     gem install bundler
+     ```
+   - Then install the required gems:
+     ```bash
+     bundler install
+     ```
+
+5. **Run the Game**
+   ```bash
+   ruby main.rb
+   ```
 ## How to play
 ### Game Introduction
 When you start the game and saved games exist, you’ll first be asked if you want to load one:  
@@ -91,7 +113,7 @@ If you choose to restart:
 2. You’ll be asked if you want to keep the **same players** (names and colors):  
    - Type `y` to use the same players.  
    - Type `n` to enter new player names and choose colors again.  
-3. A fresh game begins — White always moves first.  
+3. A fresh game begins.
 
 This allows you to quickly start a rematch without retyping player info unless you want to.  
 
@@ -163,7 +185,13 @@ Some key takeaways:
   Saw the value of separating responsibilities (e.g., move validation, checkmate detection, and messages are in their own modules).  
 
 - **User Interaction in the Terminal**  
-  Learned how to design clear text-based menus and commands (`save`, `exit`) for a smoother terminal experience.  
+  Learned how to design clear text-based menus and commands (`save`, `exit`) for a smoother terminal experience.
+
+- **Testing and Quality Assurance**  
+  Testing was a huge eye-opener. Writing tests helped me catch bugs, think about edge cases, and refactor with confidence. I realized that good tests don’t just prevent mistakes—they make you a better programmer.
+
+- **Reflection**
+  The hardest part was getting move validation and check/checkmate logic right, but figuring it out was incredibly satisfying. This project reinforced that planning carefully, keeping your code focused, testing as you go, and paying attention to code quality are all key to building something that actually works.
 
 Overall, I’ve deepened my understanding of Ruby, problem-solving, and how to structure a larger project from scratch.  
 
